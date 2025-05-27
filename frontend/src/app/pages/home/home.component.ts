@@ -11,6 +11,12 @@ import { ImageInputComponent } from "../../componenets/image-input/image-input.c
 export class HomeComponent {
   isSidebarHidden = false;
 
+  selectedItem: string = 'dashboard'; 
+
+  selectItem(item: string): void {
+    this.selectedItem = item;
+  }
+
   toggleSidebar() {
     this.isSidebarHidden = !this.isSidebarHidden;
   }
