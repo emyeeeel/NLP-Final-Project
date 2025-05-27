@@ -1,1 +1,116 @@
-<app-image-input></app-image-input>
+<div class="dashboard-container">
+  <!-- Sidebar -->
+  <div class="sidebar" [class.hidden]="isSidebarHidden">
+    <ul>
+      <li>
+        <a href="javascript:void(0)" class="nav-item active" aria-label="Dashboard">
+            <span class="nav-icon" aria-hidden="true"><i class="fas fa-th-large"></i></span>
+            Dashboard
+        </a>
+      </li>
+      <li>
+        <a href="javascript:void(0)" class="nav-item" aria-label="Malicious URL Detection">
+            <span class="nav-icon" aria-hidden="true"><i class="fas fa-university"></i></span>
+            Malicious URL Detection
+        </a>
+      </li>
+      <li>
+        <a href="javascript:void(0)" class="nav-item" aria-label="Networking Scam Detection">
+            <span class="nav-icon" aria-hidden="true"><i class="fas fa-building"></i></span>
+            Networking Scam Detection
+        </a>
+      </li>
+      <li>
+        <a href="javascript:void(0)" class="nav-item" aria-label="Phishing Interception">
+            <span class="nav-icon" aria-hidden="true"><i class="fas fa-book"></i></span>
+            Phishing Interception
+        </a>
+      </li>
+      <li>
+        <a href="javascript:void(0)" class="nav-item" aria-label="Social Engineering Defense">
+            <span class="nav-icon" aria-hidden="true"><i class="fas fa-user-graduate"></i></span>
+            Social Engineering Defense
+        </a>
+      </li>
+      <li>
+        <a href="javascript:void(0)" class="nav-item" aria-label="Fake Account Identification">
+            <span class="nav-icon" aria-hidden="true"><i class="fas fa-cog"></i></span>
+            Fake Account Identification
+        </a>
+      </li>
+      <li>
+        <a href="javascript:void(0)" class="nav-item" aria-label="Logout">
+            <span class="nav-icon" aria-hidden="true"><i class="fas fa-sign-out-alt"></i></span>
+            Logout
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <header>
+      <button class="hamburger" (click)="toggleSidebar()">☰</button>
+      <h1>Homepage Dashboard</h1>
+    </header>
+    <div class="content">
+        <!-- Stats Cards -->
+        <section class="stats-container">
+            <!-- Malicious URL Detection -->
+            <article class="stat-card url-detection">
+                <div class="stat-header">
+                    <span class="stat-title">Malicious URL Detection</span>
+                    <div class="stat-icon" aria-hidden="true">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                </div>
+                <p class="stat-description">Real-time AI scanning of shortened links, typosquatting domains, and embedded redirects.</p>
+            </article>
+
+            <!-- Networking Scam Detection -->
+            <article class="stat-card scam-detection">
+                <div class="stat-header">
+                    <span class="stat-title">Networking Scam Detection</span>
+                    <div class="stat-icon" aria-hidden="true">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                </div>
+                <p class="stat-description">Identify and block fraudulent networking schemes targeting users.</p>
+            </article>
+
+            <!-- Phishing Interception -->
+            <article class="stat-card phishing">
+                <div class="stat-header">
+                    <span class="stat-title">Phishing Interception</span>
+                    <div class="stat-icon" aria-hidden="true">
+                        <i class="fas fa-fish"></i>
+                    </div>
+                </div>
+                <p class="stat-description">Detect and neutralize phishing attempts in emails and websites.</p>
+            </article>
+
+            <!-- Social Engineering Defense -->
+            <article class="stat-card social-engineering">
+                <div class="stat-header">
+                    <span class="stat-title">Social Engineering Defense</span>
+                    <div class="stat-icon" aria-hidden="true">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                </div>
+                <p class="stat-description">Prevent manipulation tactics used to extract sensitive information.</p>
+            </article>
+
+            <!-- Fake Account Identification -->
+            <article class="stat-card fake-accounts">
+                <div class="stat-header">
+                    <span class="stat-title">Fake Account Identification</span>
+                    <div class="stat-icon" aria-hidden="true">
+                        <i class="fas fa-ghost"></i>
+                    </div>
+                </div>
+                <p class="stat-description">Spot and eliminate fake accounts across social platforms.</p>
+            </article>
+        </section>
+    </div>
+  </div>
+</div>

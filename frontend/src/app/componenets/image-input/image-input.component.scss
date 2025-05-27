@@ -408,22 +408,6 @@
     }
   }
   
-  .bottom-review-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 24px;
-  
-    .privacy-disclaimer {
-      margin: 0;
-      font-size: 14px;
-      color: #9da9b5;
-      line-height: 20px;
-      font-style: italic;
-      font-weight: 500;
-    }
-  }
-  
   // Responsive Design
   @media (max-width: 768px) {
     .tool {
