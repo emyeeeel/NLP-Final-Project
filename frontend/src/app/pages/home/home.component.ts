@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ImageInputComponent } from "../../componenets/image-input/image-input.component";
 
 @Component({
   selector: 'app-home',
-  imports: [CommonModule, ImageInputComponent],
+  imports: [CommonModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
