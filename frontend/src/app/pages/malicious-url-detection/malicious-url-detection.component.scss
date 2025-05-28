@@ -162,3 +162,86 @@ header {
   color: #7f8c8d; // Muted color for the description
   line-height: 1.5; // Improve readability
 }
+
+.content {
+  h2 {
+    font-size: 2rem; // Larger font size for the title
+    font-weight: bold;
+    color: #2c3e50; // Darker color for the title
+    margin-bottom: 10px; // Space below the title
+  }
+
+  p {
+    font-size: 1rem; // Base font size
+    color: #34495e; // Darker text color
+    margin-bottom: 20px; // Space below the paragraph
+  }
+
+  .input-type-selector {
+    display: flex;
+    gap: 10px; // Space between buttons
+    margin-bottom: 20px; // Space below the button group
+
+    button {
+      flex: 1; // Make buttons take equal space
+      padding: 10px;
+      font-size: 1rem; // Base font size
+      font-weight: bold;
+      color: white;
+      background-color: #3498db; // Primary button color
+      border: none;
+      border-radius: 5px; // Rounded corners
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+
+      &.active {
+        background-color: #1abc9c; // Active button color
+      }
+
+      &:hover {
+        background-color: #2980b9; // Darker shade on hover
+      }
+    }
+  }
+
+  .input-content {
+    .input-section {
+      background-color: #ffffff; // Section background color
+      border-radius: 8px; // Rounded corners
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); // Subtle shadow for depth
+      padding: 20px;
+      margin-bottom: 20px; // Space below each section
+    }
+
+    textarea,
+    input[type='url'] {
+      width: 100%; // Full width
+      padding: 10px;
+      font-size: 1rem; // Base font size
+      border: 1px solid #bdc3c7; // Light border
+      border-radius: 5px; // Rounded corners
+      margin-bottom: 10px; // Space below the input
+    }
+
+    input[type='file'] {
+      margin-bottom: 10px; // Space below the file input
+    }
+
+    .submit-button {
+      display: inline-block;
+      padding: 10px 20px;
+      font-size: 1rem; // Base font size
+      font-weight: bold;
+      color: white;
+      background-color: #3498db; // Primary button color
+      border: none;
+      border-radius: 5px; // Rounded corners
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #2980b9; // Darker shade on hover
+      }
+    }
+  }
+}

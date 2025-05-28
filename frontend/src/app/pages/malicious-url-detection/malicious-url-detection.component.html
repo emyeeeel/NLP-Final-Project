@@ -90,7 +90,69 @@
         </div>
       </header>
       <div class="content">
+        <h2>Malicious URL Detection</h2>
+        <p>Select the type of input you want to use:</p>
         
+        <div class="input-type-selector">
+          <button (click)="selectInputType('text')" [class.active]="selectedInputType === 'text'">Text Input</button>
+          <button (click)="selectInputType('url')" [class.active]="selectedInputType === 'url'">URL Input</button>
+          <button (click)="selectInputType('image')" [class.active]="selectedInputType === 'image'">Image Input</button>
+        </div>
+
+        <div class="input-content">
+          <div *ngIf="selectedInputType === 'text'" class="input-section">
+            <h3>Text Input</h3>
+            <textarea placeholder="Enter text here..." rows="5"></textarea>
+            <button class="submit-button">Submit</button>
+          </div>
+
+          <div *ngIf="selectedInputType === 'url'" class="input-section">
+            <h3>URL Input</h3>
+            <input type="url" placeholder="Enter URL here..." />
+            <button class="submit-button">Submit</button>
+          </div>
+
+          <div *ngIf="selectedInputType === 'image'" class="input-section">
+            <h3>Image Input</h3>
+            <app-image-input></app-image-input>
+            <button class="submit-button">Submit</button>
+          </div>
+        </div>
+
+        <div class="output-content">
+          <h3>Output</h3>
+          <div class="output-area">
+            <!-- This area will display extracted links and LLM-generated wordings -->
+          </div>
+        </div>
       </div>
     </div>
   </div>
+
+  <style>
+    .output-content {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #f9fafb; /* Light background for the output area */
+      border: 1px solid #e5e7eb; /* Subtle border for separation */
+      border-radius: 8px;
+    }
+
+    .output-content h3 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #2c3e50; /* Darker text color for the heading */
+      margin-bottom: 15px;
+    }
+
+    .output-area {
+      min-height: 150px; /* Ensure the area has some height even when empty */
+      background-color: #ffffff; /* White background for the output area */
+      border: 1px dashed #d1d5db; /* Dashed border to indicate it's editable */
+      border-radius: 8px;
+      padding: 15px;
+      font-size: 1rem;
+      color: #6b7280; /* Muted text color for placeholder content */
+      overflow-y: auto; /* Allow scrolling if content overflows */
+    }
+  </style>
