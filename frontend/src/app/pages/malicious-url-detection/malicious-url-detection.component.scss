@@ -2,14 +2,14 @@
 
 .dashboard-container {
   display: grid;
-  grid-template-columns: auto 1fr; // Sidebar and main content
+  grid-template-columns: auto 1fr; 
   height: 100vh;
   transition: grid-template-columns 0.3s ease;
 }
 
 .sidebar {
   width: 250px;
-  background-color: #2c3e50; // Dark background for the sidebar
+  background-color: #2c3e50; 
   color: white;
   padding: 15px;
   transition: transform 0.3s ease, width 0.3s ease;
@@ -31,25 +31,25 @@
       a {
         display: flex;
         align-items: center;
-        gap: 10px; // Space between icon and text
+        gap: 10px;
         color: white;
         text-decoration: none;
         padding: 10px 15px;
-        border-radius: 5px; // Rounded corners for links
+        border-radius: 5px; 
         transition: background-color 0.3s ease, color 0.3s ease;
 
         &:hover {
-          background-color: #34495e; // Slightly lighter background on hover
-          color: #ecf0f1; // Lighter text color on hover
+          background-color: #34495e; 
+          color: #ecf0f1; 
         }
 
         &.active {
-          background-color: #1abc9c; // Highlight active link
+          background-color: #1abc9c;
           color: white;
         }
 
         .nav-icon {
-          font-size: 1.2rem; // Adjust icon size
+          font-size: 1.2rem; 
         }
       }
     }
@@ -70,7 +70,7 @@ header {
   .header-left {
     display: flex;
     align-items: center;
-    gap: 10px; // Space between the hamburger button and the text
+    gap: 10px; 
   }
 
   .hamburger {
@@ -81,21 +81,21 @@ header {
   }
 
   .brand-name {
-    font-size: 1.5rem; // Adjust font size for the brand name
+    font-size: 1.5rem; 
     font-weight: bold;
-    color: #2c3e50; // Darker color for the text
+    color: #2c3e50; 
   }
 
   .header-right {
     display: flex;
     align-items: center;
-    gap: 15px; // Space between the welcome message and the user icon
+    gap: 15px; 
 
     h1 {
-      font-size: 1.5rem; // Adjust font size for the welcome message
+      font-size: 1.5rem; 
       font-weight: bold;
-      color: #2c3e50; // Darker color for the text
-      margin: 0; // Remove default margin
+      color: #2c3e50; 
+      margin: 0; 
     }
 
     .user-icon {
@@ -104,37 +104,37 @@ header {
       justify-content: center;
       width: 40px;
       height: 40px;
-      background-color: #1abc9c; // Background color for the user icon
-      color: white; // Text color for the initial
-      font-size: 1.2rem; // Font size for the initial
+      background-color: #1abc9c; 
+      color: white; 
+      font-size: 1.2rem; 
       font-weight: bold;
-      border-radius: 50%; // Make it circular
-      text-transform: uppercase; // Ensure the initial is uppercase
+      border-radius: 50%; 
+      text-transform: uppercase; 
     }
   }
 }
 
 .stats-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); // Responsive grid layout
-  gap: 20px; // Space between cards
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+  gap: 20px; 
   padding: 20px;
 }
 
 .stat-card {
-  background-color: #ffffff; // Card background color
-  border-radius: 8px; // Rounded corners
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); // Subtle shadow for depth
+  background-color: #ffffff; 
+  border-radius: 8px; 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
   padding: 20px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease; // Smooth hover effect
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
 
   &:hover {
-    transform: translateY(-5px); // Lift the card slightly on hover
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); // Enhance shadow on hover
+    transform: translateY(-5px); 
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); 
   }
 }
 
@@ -142,106 +142,132 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px; // Space between title and icon
+  gap: 10px; 
   margin-bottom: 15px;
 }
 
 .stat-title {
-  font-size: 1.2rem; // Slightly larger font for the title
+  font-size: 1.2rem; 
   font-weight: bold;
-  color: #2c3e50; // Darker color for the title
+  color: #2c3e50; 
 }
 
 .stat-icon {
-  font-size: 2rem; // Larger icon size
-  color: #3498db; // Primary color for the icon
+  font-size: 2rem;
+  color: #3498db; 
 }
 
 .stat-description {
-  font-size: 0.9rem; // Smaller font for the description
-  color: #7f8c8d; // Muted color for the description
-  line-height: 1.5; // Improve readability
+  font-size: 0.9rem; 
+  color: #7f8c8d; 
+  line-height: 1.5; 
 }
 
 .content {
   h2 {
-    font-size: 2rem; // Larger font size for the title
+    font-size: 2rem; 
     font-weight: bold;
-    color: #2c3e50; // Darker color for the title
-    margin-bottom: 10px; // Space below the title
+    color: #2c3e50; 
+    margin-bottom: 10px; 
   }
 
   p {
-    font-size: 1rem; // Base font size
-    color: #34495e; // Darker text color
-    margin-bottom: 20px; // Space below the paragraph
+    font-size: 1rem; 
+    color: #34495e; 
+    margin-bottom: 20px; 
   }
 
   .input-type-selector {
     display: flex;
-    gap: 10px; // Space between buttons
-    margin-bottom: 20px; // Space below the button group
+    gap: 10px; 
+    margin-bottom: 20px; 
 
     button {
-      flex: 1; // Make buttons take equal space
+      flex: 1; 
       padding: 10px;
-      font-size: 1rem; // Base font size
+      font-size: 1rem; 
       font-weight: bold;
       color: white;
-      background-color: #3498db; // Primary button color
+      background-color: #3498db; 
       border: none;
-      border-radius: 5px; // Rounded corners
+      border-radius: 5px; 
       cursor: pointer;
       transition: background-color 0.3s ease;
 
       &.active {
-        background-color: #1abc9c; // Active button color
+        background-color: #1abc9c; 
       }
 
       &:hover {
-        background-color: #2980b9; // Darker shade on hover
+        background-color: #2980b9; 
       }
     }
   }
 
   .input-content {
     .input-section {
-      background-color: #ffffff; // Section background color
-      border-radius: 8px; // Rounded corners
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); // Subtle shadow for depth
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
       padding: 20px;
-      margin-bottom: 20px; // Space below each section
+      margin-bottom: 20px; 
     }
 
     textarea,
     input[type='url'] {
-      width: 100%; // Full width
+      width: 100%; 
       padding: 10px;
-      font-size: 1rem; // Base font size
-      border: 1px solid #bdc3c7; // Light border
-      border-radius: 5px; // Rounded corners
-      margin-bottom: 10px; // Space below the input
+      font-size: 1rem; 
+      border: 1px solid #bdc3c7; 
+      border-radius: 5px; 
+      margin-bottom: 10px; 
     }
 
     input[type='file'] {
-      margin-bottom: 10px; // Space below the file input
+      margin-bottom: 10px; 
     }
 
     .submit-button {
       display: inline-block;
       padding: 10px 20px;
-      font-size: 1rem; // Base font size
+      font-size: 1rem;
       font-weight: bold;
       color: white;
-      background-color: #3498db; // Primary button color
+      background-color: #3498db; 
       border: none;
-      border-radius: 5px; // Rounded corners
+      border-radius: 5px; 
       cursor: pointer;
       transition: background-color 0.3s ease;
 
       &:hover {
-        background-color: #2980b9; // Darker shade on hover
+        background-color: #2980b9;
       }
     }
   }
+}
+
+.output-content {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #f9fafb; 
+  border: 1px solid #e5e7eb; 
+  border-radius: 8px;
+}
+
+.output-content h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #2c3e50; 
+  margin-bottom: 15px;
+}
+
+.output-area {
+  min-height: 150px; 
+  background-color: #ffffff; 
+  border: 1px dashed #d1d5db; 
+  border-radius: 8px;
+  padding: 15px;
+  font-size: 1rem;
+  color: #6b7280; 
+  overflow-y: auto; 
 }

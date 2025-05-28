@@ -7,7 +7,7 @@
     text-align: center;
     font-family: 'Roboto', sans-serif;
     font-size: 18px;
-    color: #2c3e50; // Darker text color for consistency
+    color: #2c3e50; 
     line-height: 1.5;
     max-width: 100%;
     font-weight: 400;
@@ -17,9 +17,9 @@
     margin: 32px auto 0;
     padding: 16px;
     max-width: 1200px;
-    background-color: #ffffff; // White background for consistency
+    background-color: #ffffff; 
     border-radius: 16px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); // Subtle shadow for depth
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
     display: grid;
     gap: 16px;
   
@@ -46,8 +46,8 @@
     background-color: #f8f9fc;
   
     &:hover {
-      border-color: #1abc9c; // Consistent hover color
-      background-color: #e8f6f3; // Slightly lighter green background
+      border-color: #1abc9c; 
+      background-color: #e8f6f3; 
     }
   
     &.dragover {
@@ -123,7 +123,7 @@
       background: transparent;
   
       label {
-        background: #1abc9c; // Consistent button color
+        background: #1abc9c; 
         color: white;
         min-width: 130px;
         border-radius: 8px;
@@ -138,7 +138,7 @@
         font-size: 16px;
   
         &:hover {
-          background: #16a085; // Slightly darker green on hover
+          background: #16a085; 
           transform: translateY(-1px);
         }
       }
@@ -159,7 +159,6 @@
     }
   }
   
-  // URL Input Section
   .url-input-section {
     display: flex;
     flex-direction: column;
@@ -180,7 +179,7 @@
       transition: border-color 0.3s ease;
   
       &:focus {
-        border-color: #1abc9c; // Consistent focus color
+        border-color: #1abc9c; 
       }
   
       &::placeholder {
@@ -228,7 +227,6 @@
     }
   }
   
-  // Processing State
   .processing-state {
     display: flex;
     flex-direction: column;
@@ -239,7 +237,7 @@
       width: 40px;
       height: 40px;
       border: 4px solid #f3f4f6;
-      border-top: 4px solid #1abc9c; // Consistent spinner color
+      border-top: 4px solid #1abc9c; 
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
@@ -251,7 +249,6 @@
     }
   }
   
-  // File Preview Section
   .file-preview-section {
     display: flex;
     flex-direction: column;
@@ -330,7 +327,6 @@
     }
   }
   
-  // Results Section
   .results-section {
     margin-top: 32px;
     padding: 24px;
@@ -403,7 +399,6 @@
     }
   }
   
-  // Responsive Design
   @media (max-width: 768px) {
     .tool {
       margin: 16px;

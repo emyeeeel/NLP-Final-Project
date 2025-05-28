@@ -1,0 +1,94 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f8f9fc; // Light background for the registration page
+  font-family: 'Roboto', sans-serif;
+}
+
+.register-card {
+  background-color: #ffffff; // White card background
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); // Subtle shadow for depth
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.register-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #2c3e50; // Darker text color for the title
+  margin-bottom: 10px;
+}
+
+.register-subtitle {
+  font-size: 1rem;
+  color: #7f8c8d; // Muted text color for the subtitle
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+
+  label {
+    display: block;
+    font-size: 0.9rem;
+    color: #2c3e50;
+    margin-bottom: 5px;
+  }
+
+  input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #374151;
+    outline: none;
+    transition: border-color 0.3s ease;
+
+    &:focus {
+      border-color: #1abc9c; // Consistent focus color
+    }
+
+    &::placeholder {
+      color: #9ca3af;
+    }
+  }
+}
+
+.register-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #1abc9c; // Consistent button color
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #16a085; // Slightly darker green on hover
+  }
+}
+
+.register-footer {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #7f8c8d;
+
+  a {
+    color: #3498db; // Link color
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

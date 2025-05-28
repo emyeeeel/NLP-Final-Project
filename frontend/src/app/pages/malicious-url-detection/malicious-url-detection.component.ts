@@ -21,8 +21,8 @@ export class MaliciousUrlDetectionComponent {
     this.isSidebarHidden = !this.isSidebarHidden;
   }
 
-  selectedInputType: string = 'text'; // Default input type
-
+  selectedInputType: string = 'text'; 
+  
   selectInputType(type: string): void {
     this.selectedInputType = type;
   }
