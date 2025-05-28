@@ -14,15 +14,14 @@ class RegisterView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        username = request.data.get('username')
+        username = request.data.get('name') or request.data.get('username') 
         password = request.data.get('password')
         email = request.data.get('email')
 
         if not username or not password or not email:
             return Response(
-                {"detail": ""
-                "Please provide username, email and password"},
-                  status=status.HTTP_400_BAD_REQUEST)
+                {"detail": "Please provide username, email and password."},
+                status=status.HTTP_400_BAD_REQUEST)
 
         if User.objects.filter(username=username).exists():
             return Response(
@@ -31,7 +30,7 @@ class RegisterView(APIView):
         
         if User.objects.filter(email=email).exists():
             return Response(
-                {"detail": "Username already exists."},
+                {"detail": "Email already exists."},
                 status=status.HTTP_400_BAD_REQUEST)
 
         user = User.objects.create_user(
@@ -55,20 +54,20 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        identifier = request.data.get('username')
+        identifier = request.data.get('identifier')
         password = request.data.get('password')
 
         if not identifier or not password:
             return Response(
-                {"detail": "Please both identifier and password"},
+                {"detail": "Please provide both identifier and password."},
                 status=status.HTTP_400_BAD_REQUEST)
 
         user = authenticate(username=identifier, password=password)
 
         if user is None:
             try:
-                user_obj = User.objects.get(emai=identifier)
-                user = authenticate(userame=user_obj.username, password=password)
+                user_obj = User.objects.get(email=identifier)
+                user = authenticate(username=user_obj.username, password=password)
             except User.DoesNotExist: 
                 user = None
 
@@ -88,7 +87,3 @@ class LoginView(APIView):
                 "isAdmin": user.is_staff,
             }
         }, status=status.HTTP_200_OK)
-
-
-
-# Create your views here.

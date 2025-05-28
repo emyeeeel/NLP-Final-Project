@@ -12,7 +12,7 @@ import { AuthGuard } from './guards/auth.guard';
 
 
 export const routes: Routes = [
-    { path: '', component: HomeComponent, pathMatch: 'full',},
+    { path: '', redirectTo: 'home', pathMatch: 'full',},
     { path: 'malicious-url-detection', component: MaliciousUrlDetectionComponent, canActivate: [AuthGuard] },
     { path: 'networking-scam-detection', component: NetworkingScamDetectionComponent, canActivate: [AuthGuard] },
     { path: 'phishing-interception', component: PhishingInterceptionComponent, canActivate: [AuthGuard] },

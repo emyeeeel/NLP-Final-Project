@@ -11,8 +11,6 @@ import { catchError, filter, take, switchMap } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 
 @Injectable()
-
-
 export class AuthInterceptor implements HttpInterceptor {
   private isRefreshing = false;
   private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
@@ -69,6 +67,4 @@ export class AuthInterceptor implements HttpInterceptor {
       );
     }
   }
-
-  
 }

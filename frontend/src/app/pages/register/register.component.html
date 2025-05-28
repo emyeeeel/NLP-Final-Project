@@ -1,12 +1,8 @@
 <div class="register-container">
   <div class="register-card">
-
     <h2 class="register-title">Create Your Account</h2>
-
     <p class="register-subtitle">Join BantAI to start detecting malicious URLs</p>
-
     <form (ngSubmit)="onSubmit()">
-
       <div class="form-group">
         <label for="name">Full Name</label>
         <input 
@@ -17,7 +13,6 @@
           placeholder="Enter your full name" 
           required />
       </div>
-
       <div class="form-group">
         <label for="email">Email</label>
         <input 
@@ -28,7 +23,6 @@
           placeholder="Enter your email" 
           required />
       </div>
-
       <div class="form-group">
         <label for="password">Password</label>
         <input 
@@ -39,7 +33,6 @@
           placeholder="Enter your password" 
           required />
       </div>
-
       <div class="form-group">
         <label for="confirm-password">Confirm Password</label>
         <input 
@@ -50,21 +43,16 @@
           placeholder="Confirm your password" 
           required />
       </div>
-
       <div class="error-message" *ngIf="error">{{ error }}</div>
-
       <button 
         type="submit" 
         class="register-button" 
         [disabled]="loading">
         {{ loading ? 'Creating Account...' : 'Sign Up' }}
       </button>
-
     </form>
-
     <p class="register-footer">
       Already have an account? <a routerLink="/login">Log in</a>
     </p>
-
   </div>
 </div>

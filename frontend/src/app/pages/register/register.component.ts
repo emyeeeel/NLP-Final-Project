@@ -11,7 +11,6 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss'
 })
-
 export class RegisterComponent {
   name: string = '';
   email: string = '';
@@ -26,7 +25,6 @@ export class RegisterComponent {
   ) {}
 
   onSubmit(): void {
-
     if (!this.name || !this.email || !this.password || !this.confirmPassword) {
       this.error = 'All fields are required.';
       return;
