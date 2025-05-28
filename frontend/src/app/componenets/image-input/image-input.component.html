@@ -1,0 +1,122 @@
+<div class="tool home tool-grid">
+  <div>
+    <div class="tool-span">
+      <div class="tool-area">
+        <div 
+          class="upload-section"
+          [class.dragover]="isDragOver"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+          (click)="triggerFileInput()">
+          
+          <!-- Before Upload State -->
+          <div class="before-upload upload-area" *ngIf="!selectedFiles.length && !isProcessing">
+            <label for="file" class="cursor-pointer">
+              <img 
+                src="https://www.imagetotext.info/web_assets/frontend/img/icons/tool-box-image-home-new.svg?v=1.2.7" 
+                alt="image-logo" 
+                class="upload-section-img" 
+                height="82" 
+                width="100">
+            </label>
+            
+            <span class="drag-n-drop-text">
+              Drop, Upload or Paste Images<br>
+              <small>Supported formats: JPG, PNG, GIF, JFIF (JPEG), HEIC, PDF</small>
+            </span>
+            
+            <div class="selection-div">
+              <div class="dropdown browse-btn">
+                <button class="browse-dropbtn" type="button">
+                  <label for="file">
+                    <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                    <span>Browse</span>
+                  </label>
+                </button>
+              </div>
+              
+              <div class="url-switch cursor-pointer" (click)="toggleUrlInput(); $event.stopPropagation()">
+                <img 
+                  src="https://www.imagetotext.info/web_assets/frontend/img/icons/url-icon.svg?v=1.2.7" 
+                  alt="url icon" 
+                  class="url-icon" 
+                  width="18" 
+                  height="18">
+              </div>
+            </div>
+            <!-- URL Input State -->
+          <div class="url-input-section" *ngIf="showUrlInput">
+            <input 
+              type="url" 
+              [(ngModel)]="imageUrl" 
+              placeholder="Enter image URL"
+              class="url-input"
+              (click)="$event.stopPropagation()">
+            <div class="url-buttons">
+              <button (click)="loadFromUrl(); $event.stopPropagation()" [disabled]="!imageUrl" class="load-btn">
+                Load Image
+              </button>
+              <button (click)="toggleUrlInput(); $event.stopPropagation()" class="cancel-btn">
+                Cancel
+              </button>
+            </div>
+          </div>
+          </div>
+
+          <!-- Processing State -->
+          <div class="processing-state" *ngIf="isProcessing">
+            <div class="spinner"></div>
+            <p>Processing your image...</p>
+          </div>
+
+          <!-- File Preview State -->
+          <div class="file-preview-section" *ngIf="selectedFiles.length && !isProcessing">
+            <div class="file-preview" *ngFor="let file of selectedFiles; let i = index">
+              <img [src]="file.preview" alt="Preview" class="preview-image">
+              <div class="file-info">
+                <p class="file-name">{{ file.name }}</p>
+                <p class="file-size">{{ formatFileSize(file.size) }}</p>
+              </div>
+              <button class="remove-file" (click)="removeFile(i); $event.stopPropagation()">×</button>
+            </div>
+            <button class="process-btn" (click)="processImages(); $event.stopPropagation()">
+              Extract Text
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div class="results-section" *ngIf="extractedText">
+    <h3>Extracted Text:</h3>
+    <div class="text-output">
+      <textarea 
+        [(ngModel)]="extractedText" 
+        readonly 
+        class="extracted-text-area"
+        rows="10">
+      </textarea>
+      <div class="text-actions">
+        <button (click)="copyToClipboard()" class="copy-btn">
+          {{ copySuccess ? 'Copied!' : 'Copy Text' }}
+        </button>
+        <button (click)="downloadText()" class="download-btn">
+          Download as TXT
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden file input -->
+<input 
+  #fileInput
+  type="file" 
+  id="file"
+  (change)="onFileSelected($event)"
+  accept="image/*,.pdf"
+  multiple
+  style="display: none;">

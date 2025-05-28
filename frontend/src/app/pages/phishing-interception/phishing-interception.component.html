@@ -1,0 +1,130 @@
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <div class="sidebar" [class.hidden]="isSidebarHidden">
+      <ul>
+          <li>
+              <a href="/home" 
+                 class="nav-item" 
+                 [class.active]="selectedItem === 'dashboard'" 
+                 (click)="selectItem('dashboard')" 
+                 aria-label="Dashboard">
+                <span class="nav-icon" aria-hidden="true"><i class="fas fa-th-large"></i></span>
+                Dashboard
+              </a>
+            </li>
+            <li>
+              <a href="/malicious-url-detection" 
+                 class="nav-item" 
+                 [class.active]="selectedItem === 'malicious-url-detection'" 
+                 (click)="selectItem('malicious-url-detection')" 
+                 aria-label="Malicious URL Detection">
+                <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-lock"></i></span>
+                Malicious URL Detection
+              </a>
+            </li>
+            <li>
+              <a href="/networking-scam-detection" 
+                 class="nav-item" 
+                 [class.active]="selectedItem === 'networking-scam-detection'" 
+                 (click)="selectItem('networking-scam-detection')" 
+                 aria-label="Networking Scam Detection">
+                <span class="nav-icon" aria-hidden="true"><i class="fas fa-user-friends"></i></span>
+                Networking Scam Detection
+              </a>
+            </li>
+            <li>
+              <a href="/phishing-interception" 
+                 class="nav-item" 
+                 [class.active]="selectedItem === 'phishing-interception'" 
+                 (click)="selectItem('phishing-interception')" 
+                 aria-label="Phishing Interception">
+                <span class="nav-icon" aria-hidden="true"><i class="fas fa-fish"></i></span>
+                Phishing Interception
+              </a>
+            </li>
+            <li>
+              <a href="/social-engineering-defense" 
+                 class="nav-item" 
+                 [class.active]="selectedItem === 'social-engineering-defense'" 
+                 (click)="selectItem('social-engineering-defense')" 
+                 aria-label="Social Engineering Defense">
+                <span class="nav-icon" aria-hidden="true"><i class="fas fa-brain"></i></span>
+                Social Engineering Defense
+              </a>
+            </li>
+            <li>
+              <a href="/fake-account-identification" 
+                 class="nav-item" 
+                 [class.active]="selectedItem === 'fake-account-identification'" 
+                 (click)="selectItem('fake-account-identification')" 
+                 aria-label="Fake Account Identification">
+                <span class="nav-icon" aria-hidden="true"><i class="fas fa-ghost"></i></span>
+                Fake Account Identification
+              </a>
+            </li>
+            <li>
+              <a href="javascript:void(0)" 
+                 class="nav-item" 
+                 [class.active]="selectedItem === 'logout'" 
+                 (click)="selectItem('logout')" 
+                 aria-label="Logout">
+                <span class="nav-icon" aria-hidden="true"><i class="fas fa-sign-out-alt"></i></span>
+                Logout
+              </a>
+            </li>
+      </ul>
+    </div>
+  
+    <!-- Main Content -->
+    <div class="main-content">
+      <header>
+        <div class="header-left">
+          <button class="hamburger" (click)="toggleSidebar()">☰</button>
+          <span class="brand-name">BantAI</span>
+        </div>
+        <div class="header-right">
+          <h1>Welcome, User</h1>
+          <div class="user-icon" aria-label="User Profile">
+            U
+          </div>
+        </div>
+      </header>
+      <div class="content">
+        <h2>Phising Interception</h2>
+        <p>Select the type of input you want to use:</p>
+        
+        <div class="input-type-selector">
+          <button (click)="selectInputType('text')" [class.active]="selectedInputType === 'text'">Text Input</button>
+          <button (click)="selectInputType('url')" [class.active]="selectedInputType === 'url'">URL Input</button>
+          <button (click)="selectInputType('image')" [class.active]="selectedInputType === 'image'">Image Input</button>
+        </div>
+
+        <div class="input-content">
+          <div *ngIf="selectedInputType === 'text'" class="input-section">
+            <h3>Text Input</h3>
+            <textarea placeholder="Enter text here..." rows="5"></textarea>
+            <button class="submit-button">Submit</button>
+          </div>
+
+          <div *ngIf="selectedInputType === 'url'" class="input-section">
+            <h3>URL Input</h3>
+            <input type="url" placeholder="Enter URL here..." />
+            <button class="submit-button">Submit</button>
+          </div>
+
+          <div *ngIf="selectedInputType === 'image'" class="input-section">
+            <h3>Image Input</h3>
+            <app-image-input></app-image-input>
+            <button class="submit-button">Submit</button>
+          </div>
+        </div>
+
+        <div class="output-content">
+          <h3>Output</h3>
+          <div class="output-area">
+            <!-- This area will display extracted links and LLM-generated wordings -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
