@@ -80,3 +80,21 @@ def scrape_tweet_get(request):
             {'error': f'An error occurred: {str(e)}'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .utils.url_extractor import extract_urls
+
+class ExtractUrlsView(APIView):
+    """
+    API endpoint to extract URLs from the provided text.
+    """
+    def post(self, request, *args, **kwargs):
+        text = request.data.get("text", "")
+        if not text:
+            return Response({"error": "Text field is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        urls = extract_urls(text)
+        return Response({"urls": urls}, status=status.HTTP_200_OK)

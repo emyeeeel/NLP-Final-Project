@@ -60,9 +60,11 @@ class TwitterScraper:
                         'url': href,
                         'text': link.get_text(strip=True)
                     })
+                    # Add space before and after the URL in the text
+                    text = text.replace(href, f" {href} ")
 
             return {
-                'text': text,
+                'text': text.strip(),  # Ensure no extra spaces at the start or end
                 'external_links': links,
                 'method': 'embed_api'
             }

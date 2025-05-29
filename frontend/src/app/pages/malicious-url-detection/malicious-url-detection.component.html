@@ -102,14 +102,14 @@
         <div class="input-content">
           <div *ngIf="selectedInputType === 'text'" class="input-section">
             <h3>Text Input</h3>
-            <textarea placeholder="Enter text here..." rows="5"></textarea>
-            <button class="submit-button">Submit</button>
+            <textarea placeholder="Enter text here..." rows="5" [(ngModel)]="textInput"></textarea>
+            <button class="submit-button" (click)="postTextToExtractUrlsApi()">Submit</button>
           </div>
 
           <div *ngIf="selectedInputType === 'url'" class="input-section">
             <h3>URL Input</h3>
-            <input type="url" placeholder="Enter URL here..." />
-            <button class="submit-button">Submit</button>
+            <input type="url" placeholder="Enter URL here..." [(ngModel)]="urlInput" />
+            <button class="submit-button" (click)="detectMaliciousUrl()">Submit</button>
           </div>
 
           <div *ngIf="selectedInputType === 'image'" class="input-section">
@@ -122,7 +122,19 @@
         <div class="output-content">
           <h3>Output</h3>
           <div class="output-area">
-            <!-- This area will display extracted links and LLM-generated wordings -->
+            <!-- Display API Response -->
+            <div *ngIf="apiResponse">
+              <h3>Raw Text:</h3>
+              <pre>{{ apiResponse }}</pre>
+            </div>
+
+            <!-- Display Extracted URLs -->
+            <div *ngIf="extractedUrls.length > 0">
+              <h3>Extracted URLs:</h3>
+              <ul>
+                <li *ngFor="let url of extractedUrls">{{ url }}</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
