@@ -246,28 +246,43 @@ header {
   }
 }
 
+/* Styling for the output content container */
 .output-content {
-  margin-top: 30px;
-  padding: 20px;
-  background-color: #f9fafb; 
-  border: 1px solid #e5e7eb; 
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
   border-radius: 8px;
 }
 
-.output-content h3 {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #2c3e50; 
+/* Styling for individual response sections */
+.response-section {
   margin-bottom: 15px;
 }
 
-.output-area {
-  min-height: 150px; 
-  background-color: #ffffff; 
-  border: 1px dashed #d1d5db; 
-  border-radius: 8px;
-  padding: 15px;
-  font-size: 1rem;
-  color: #6b7280; 
-  overflow-y: auto; 
+/* Styling for raw text response */
+.response-text {
+  font-family: 'Courier New', Courier, monospace;
+  background-color: #eef;
+  padding: 10px;
+  border-radius: 5px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  border: 1px solid #ccc;
+}
+
+/* Styling for extracted URLs list */
+.url-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.url-item {
+  background-color: #e6f7ff;
+  padding: 8px;
+  margin: 5px 0;
+  border-radius: 5px;
+  border: 1px solid #b3d8ff;
+  font-size: 14px;
+  word-wrap: break-word;
 }

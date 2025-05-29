@@ -60,8 +60,16 @@ export class MaliciousUrlDetectionComponent implements OnInit, OnDestroy {
 
   selectedInputType: string = 'text'; 
   
-  selectInputType(type: string): void {
-    this.selectedInputType = type;
+  selectInputType(inputType: string): void {
+    this.selectedInputType = inputType;
+  
+    // Reset input fields
+    this.textInput = '';
+    this.urlInput = '';
+    
+    // Reset output variables
+    this.apiResponse = null;
+    this.extractedUrls = [];
   }
 
   logout() {
