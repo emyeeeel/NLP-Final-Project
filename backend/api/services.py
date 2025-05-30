@@ -71,3 +71,241 @@ class TwitterScraper:
         except Exception as e:
             print(f"Error parsing embed data: {e}")
             return None
+        
+
+import joblib
+from pathlib import Path
+import nltk
+import re
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.util import ngrams
+
+
+nltk.download('punkt_tab')
+nltk.download('stopwords')
+
+class InstagramProfileAnalyzer:
+    def __init__(self):
+        # Load ML model
+        model_path = Path(__file__).parent / 'trained_models' / 'instagram_fake_detector.joblib'
+        self.model = joblib.load(model_path)
+        
+        try:
+            
+          
+            self.stop_words = set(stopwords.words('english'))
+            
+          
+            nltk.data.find('tokenizers/punkt')
+            
+        except LookupError as e:
+            print(f"Error downloading NLTK data: {e}")
+           
+            self.stop_words = set()
+        except Exception as e:
+            print(f"Unexpected error initializing NLTK: {e}")
+            self.stop_words = set()
+        
+        # Suspicious patterns for NLP analysis
+        self.suspicious_patterns = [
+            r'follow\s*back',
+            r'f4f',
+            r'l4l',
+            r'dm\s*for',
+            r'buy\s*\d+\s*followers',
+            r'instant\s*delivery',
+            r'cheap\s*followers'
+        ]
+
+    def analyze_text_content(self, text):
+        """NLP analysis of text content"""
+        if not text:
+            return None
+
+        # Tokenization and cleaning
+        tokens = word_tokenize(text.lower())
+        tokens = [t for t in tokens if t not in self.stop_words]
+        
+        # N-gram analysis
+        bigrams = list(ngrams(tokens, 2))
+        
+        # Text analysis metrics
+        return {
+            'token_count': len(tokens),
+            'unique_tokens': len(set(tokens)),
+            'lexical_diversity': len(set(tokens)) / len(tokens) if tokens else 0,
+            'common_bigrams': [' '.join(bg) for bg in bigrams[:3]],
+            'has_spam_indicators': self._check_spam_patterns(text)
+        }
+
+    def analyze_profile(self, data):
+        try:
+        
+            norm_followers = self.normalize_count(data['followers'])
+            norm_following = self.normalize_count(data['following'])
+            
+            username = data['username']
+            username_length = len(username)
+            username_has_number = 1 if any(c.isdigit() for c in username) else 0
+            
+            # Prepare all 12 features for ML model
+            features = [
+                norm_followers,
+                norm_following,
+                username_length,
+                username_has_number,
+                0, 
+                0, 
+                data.get('is_private', 0),
+                data.get('is_joined_recently', 0),
+                data.get('has_channel', 0),
+                data.get('is_business_account', 0),
+                data.get('has_guides', 0),
+                data.get('has_external_url', 0)
+            ]
+
+            risk_factors = self._calculate_risk_factors(data)
+
+           
+            username_analysis = self.analyze_text_content(username)
+            bio_analysis = self.analyze_text_content(data.get('bio', ''))
+            
+          
+            prediction = self.model.predict([features])
+            probability = self.model.predict_proba([features])
+            
+            final_risk = self._calculate_final_risk(
+                probability[0][1],
+                risk_factors,
+                username_analysis,
+                bio_analysis,
+                data
+            )
+
+            return {
+                'success': True,
+                'is_fake': bool(prediction[0]),
+                'confidence': float(max(probability[0])),
+                'ml_metrics': {
+                    'follower_ratio': norm_followers/norm_following if norm_following > 0 else 0,
+                    'account_type': 'Private' if data.get('is_private') else 'Public'
+                },
+                'nlp_analysis': {
+                    'username_analysis': username_analysis,
+                    'bio_analysis': bio_analysis,
+                },
+                'risk_assessment': {
+                    'overall_risk_level': self._get_risk_level(final_risk),
+                    'ml_confidence': float(max(probability[0])),
+                    'nlp_indicators': {
+                        'username_spam_score': username_analysis['has_spam_indicators'] if username_analysis else 0,
+                        'bio_spam_score': bio_analysis['has_spam_indicators'] if bio_analysis else 0
+                    }
+                }
+            }
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+        
+    def _calculate_risk_factors(self, data):
+        """Calculate initial risk factors"""
+        followers = data['followers']
+        following = data['following']
+        
+  
+        risk_factors = {
+            'follower_ratio': 0,
+            'account_properties': 0
+        }
+        
+        # Follower ratio analysis based on account size
+        if following > 0:
+            ratio = followers / following
+            if followers > 1000000:  
+                risk_factors['follower_ratio'] = 0.2 if ratio < 0.1 else 0
+            elif followers > 10000: 
+                risk_factors['follower_ratio'] = 0.5 if ratio < 0.1 else 0.2 if ratio < 0.5 else 0
+            else: 
+                risk_factors['follower_ratio'] = 0.8 if ratio < 0.1 else 0.4 if ratio < 0.5 else 0
+
+       
+        risk_factors['account_properties'] = sum([
+            0.3 if data.get('is_private', False) and followers > 1000 else 0,
+            0.3 if data.get('is_joined_recently', False) else 0,
+            -0.2 if data.get('is_business_account', False) else 0,
+            -0.2 if data.get('has_channel', False) else 0
+        ])
+
+        return risk_factors    
+    
+    def _calculate_final_risk(self, ml_prob, risk_factors, username_analysis, bio_analysis, data):
+        """Calculate final risk score with all factors"""
+        # Base weights
+        weights = {
+            'ml_model': 0.6,
+            'follower_ratio': 0.15,
+            'account_properties': 0.15,
+            'text_analysis': 0.1
+        }
+
+        # Adjust weights for high-profile accounts
+        if data['followers'] > 1000000:
+            weights['ml_model'] = 0.4
+            weights['follower_ratio'] = 0.1
+            weights['account_properties'] = 0.3
+            weights['text_analysis'] = 0.2
+
+ 
+        text_risk = (
+            (username_analysis['has_spam_indicators'] if username_analysis else 0) +
+            (bio_analysis['has_spam_indicators'] if bio_analysis else 0)
+        ) / (len(self.suspicious_patterns) * 2)
+
+        # Final weighted score
+        final_risk = (
+            ml_prob * weights['ml_model'] +
+            risk_factors['follower_ratio'] * weights['follower_ratio'] +
+            risk_factors['account_properties'] * weights['account_properties'] +
+            text_risk * weights['text_analysis']
+        )
+
+        return final_risk
+
+    def _check_spam_patterns(self, text):
+        """Check text for suspicious patterns"""
+        return sum(bool(re.search(pattern, text.lower())) for pattern in self.suspicious_patterns)
+    
+    def normalize_count(self, count):
+        """Normalize count to match training data scale"""
+        MAX_COUNT = 100000
+        return float(count) / MAX_COUNT
+
+    # def _calculate_combined_risk(self, ml_prob, username_risk, bio_risk):
+    #     """Calculate combined risk score from ML and NLP analysis"""
+    #     # Weight ML prediction more heavily (70%)
+    #     ml_weight = 0.7
+    #     nlp_weight = 0.3
+        
+    #     # Normalize NLP risks to 0-1 scale
+    #     max_spam_indicators = len(self.suspicious_patterns)
+    #     normalized_username_risk = min(username_risk / max_spam_indicators, 1)
+    #     normalized_bio_risk = min(bio_risk / max_spam_indicators, 1)
+        
+    #     # Combined NLP risk
+    #     nlp_risk = (normalized_username_risk + normalized_bio_risk) / 2
+        
+    #     # Final weighted score
+    #     return (ml_prob * ml_weight) + (nlp_risk * nlp_weight)
+
+    def normalize_count(self, count):
+        """Normalize count to match training data scale"""
+        MAX_COUNT = 100000
+        return float(count) / MAX_COUNT
+
+    def _get_risk_level(self, risk_score):
+        """Determine risk level based on combined score"""
+        if risk_score > 0.8:
+            return 'High'
+        elif risk_score > 0.5:
+            return 'Medium'
+        return 'Low'

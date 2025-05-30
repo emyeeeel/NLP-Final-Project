@@ -5,6 +5,7 @@ from rest_framework import status
 from .services import TwitterScraper
 
 
+
 @api_view(['POST'])
 def scrape_tweet(request):
     """
@@ -98,3 +99,38 @@ class ExtractUrlsView(APIView):
 
         urls = extract_urls(text)
         return Response({"urls": urls}, status=status.HTTP_200_OK)
+    
+from .services import InstagramProfileAnalyzer
+
+class AnalyzeInstagramProfileView(APIView):
+    def post(self, request):
+        """
+        Analyze Instagram profile for fake account detection
+        Required fields: username, followers, following
+        Optional fields: bio, is_private, is_joined_recently, 
+                        has_channel, is_business_account
+        """
+        try:
+         
+            required_fields = ['username', 'followers', 'following']
+            for field in required_fields:
+                if field not in request.data:
+                    return Response(
+                        {'error': f'Missing required field: {field}'}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+            analyzer = InstagramProfileAnalyzer()
+            result = analyzer.analyze_profile(request.data)
+            
+            if result['success']:
+                return Response(result, status=status.HTTP_200_OK)
+            return Response(
+                {'error': result['error']}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
