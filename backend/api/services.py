@@ -15,10 +15,33 @@ class TwitterScraper:
             'Connection': 'keep-alive',
         })
 
+    def validate_twitter_post_url(self, url):
+        """Validate if the input is a valid Twitter post URL"""
+        try:
+            parsed_url = urlparse(url)
+            domain = parsed_url.netloc.lower()
+            if ('twitter.com' in domain or 'x.com' in domain) and re.search(r'/status/\d+', url):
+                return True
+            return False
+        except Exception:
+            return False
+
+    def validate_twitter_post_url_strict(self, url):
+        """Strictly validate if the input is a valid Twitter post URL and not a profile or other URL"""
+        try:
+            parsed_url = urlparse(url)
+            domain = parsed_url.netloc.lower()
+            if ('twitter.com' in domain or 'x.com' in domain) and re.search(r'/status/\d+', url):
+                return True
+            return "Please input a valid Twitter post URL"
+        except Exception:
+            return "Please input a valid Twitter post URL"
+
     def get_tweet_content(self, url):
         """Extract tweet content using Twitter's embed API"""
-        if not self._is_valid_twitter_url(url):
-            return None
+        validation_result = self.validate_twitter_post_url_strict(url)
+        if validation_result is not True:
+            return {"error": validation_result}
 
         tweet_id = self._extract_tweet_id(url)
         if not tweet_id:
@@ -85,3 +108,4 @@ class TwitterScraper:
         except Exception as e:
             print(f"Error parsing embed data: {e}")
             return None
+

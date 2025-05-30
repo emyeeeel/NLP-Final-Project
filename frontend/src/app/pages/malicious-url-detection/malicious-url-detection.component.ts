@@ -13,6 +13,7 @@ interface ApiResponse {
     text: string;
     external_links?: Array<{ url: string; text: string }>;
     method?: string;
+    error?: string; 
   };
 }
 
@@ -113,6 +114,11 @@ export class MaliciousUrlDetectionComponent implements OnInit, OnDestroy {
     const apiUrl = 'http://localhost:8000/api/scrape-tweet/';
     this.http.post<ApiResponse>(apiUrl, { url: this.urlInput }).subscribe(
       (response) => {
+        // Check if the response contains an error
+        if (response.data.error) {
+          this.apiResponse = response.data.error;
+          return;
+        }
         this.apiResponse = response.data.text || 'No text found';
         console.log('Extracted Text:', this.apiResponse);
   
