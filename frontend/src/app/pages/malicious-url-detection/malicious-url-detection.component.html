@@ -123,16 +123,16 @@
           <h3>Output</h3>
           <div class="output-area">
             <!-- Display API Response -->
-            <div *ngIf="apiResponse">
+            <div *ngIf="apiResponse" class="response-section">
               <h3>Raw Text:</h3>
-              <pre>{{ apiResponse }}</pre>
+              <pre class="response-text">{{ apiResponse }}</pre>
             </div>
 
             <!-- Display Extracted URLs -->
-            <div *ngIf="extractedUrls.length > 0">
+            <div *ngIf="extractedUrls.length > 0" class="response-section">
               <h3>Extracted URLs:</h3>
-              <ul>
-                <li *ngFor="let url of extractedUrls">{{ url }}</li>
+              <ul class="url-list">
+                <li *ngFor="let url of extractedUrls" class="url-item">{{ url }}</li>
               </ul>
             </div>
           </div>

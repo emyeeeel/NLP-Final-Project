@@ -15,10 +15,33 @@ class TwitterScraper:
             'Connection': 'keep-alive',
         })
 
+    def validate_twitter_post_url(self, url):
+        """Validate if the input is a valid Twitter post URL"""
+        try:
+            parsed_url = urlparse(url)
+            domain = parsed_url.netloc.lower()
+            if ('twitter.com' in domain or 'x.com' in domain) and re.search(r'/status/\d+', url):
+                return True
+            return False
+        except Exception:
+            return False
+
+    def validate_twitter_post_url_strict(self, url):
+        """Strictly validate if the input is a valid Twitter post URL and not a profile or other URL"""
+        try:
+            parsed_url = urlparse(url)
+            domain = parsed_url.netloc.lower()
+            if ('twitter.com' in domain or 'x.com' in domain) and re.search(r'/status/\d+', url):
+                return True
+            return "Please input a valid Twitter post URL"
+        except Exception:
+            return "Please input a valid Twitter post URL"
+
     def get_tweet_content(self, url):
         """Extract tweet content using Twitter's embed API"""
-        if not self._is_valid_twitter_url(url):
-            return None
+        validation_result = self.validate_twitter_post_url_strict(url)
+        if validation_result is not True:
+            return {"error": validation_result}
 
         tweet_id = self._extract_tweet_id(url)
         if not tweet_id:
@@ -55,22 +78,37 @@ class TwitterScraper:
             links = []
             for link in soup.find_all('a', href=True):
                 href = link.get('href')
-                if href and not href.startswith('#') and 'twitter.com' not in href and 'x.com' not in href:
-                    links.append({
-                        'url': href,
-                        'text': link.get_text(strip=True)
-                    })
-                    # Add space before and after the URL in the text
-                    text = text.replace(href, f" {href} ")
+                display_text = link.get_text(strip=True)
+                
+                # Store link info
+                links.append({
+                    'url': href,
+                    'text': display_text
+                })
+                
+                if not display_text:
+                    continue  # Skip empty text
 
+                # Escape special characters for regex
+                escaped_text = re.escape(display_text)
+                
+                # Add space before if attached to non-whitespace
+                text = re.sub(rf'(\S)({escaped_text})', r'\1 \2', text)
+                # Add space after if attached to non-whitespace
+                text = re.sub(rf'({escaped_text})(\S)', r'\1 \2', text)
+
+            # Normalize all whitespace sequences
+            text = re.sub(r'\s+', ' ', text).strip()
+            
             return {
-                'text': text.strip(),  # Ensure no extra spaces at the start or end
+                'text': text,
                 'external_links': links,
                 'method': 'embed_api'
             }
         except Exception as e:
             print(f"Error parsing embed data: {e}")
             return None
+
         
 
 import joblib
