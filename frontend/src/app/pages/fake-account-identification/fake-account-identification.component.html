@@ -89,42 +89,185 @@
           </div>
         </div>
       </header>
+
+
       <div class="content">
-        <h2>Fake Account Identification</h2>
-        <p>Select the type of input you want to use:</p>
-        
-        <div class="input-type-selector">
-          <button (click)="selectInputType('text')" [class.active]="selectedInputType === 'text'">Text Input</button>
-          <button (click)="selectInputType('url')" [class.active]="selectedInputType === 'url'">URL Input</button>
-          <button (click)="selectInputType('image')" [class.active]="selectedInputType === 'image'">Image Input</button>
+      <h2>Instagram Fake Account Detector</h2>
+      <p>Enter account details to analyze</p>
+
+      <div class="profile-analyzer-section">
+        <form [formGroup]="profileForm" (ngSubmit)="analyzeProfile()">
+         
+          <div class="profile-basic-info">
+            <div class="form-group">
+              <label for="username">Username*</label>
+              <input 
+                type="text" 
+                id="username" 
+                formControlName="username" 
+                placeholder="e.g. john_doe123"
+                required>
+            </div>
+
+            <div class="metrics-group">
+              <div class="form-group">
+                <label for="followers">Followers Count*</label>
+                <input 
+                  type="number" 
+                  id="followers" 
+                  formControlName="followers"
+                  min="0" 
+                  required>
+              </div>
+
+              <div class="form-group">
+                <label for="following">Following Count*</label>
+                <input 
+                  type="number" 
+                  id="following" 
+                  formControlName="following"
+                  min="0" 
+                  required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="bio">Bio</label>
+              <textarea 
+                id="bio" 
+                formControlName="bio" 
+                rows="3"
+                placeholder="Account bio text (optional)"></textarea>
+            </div>
+          </div>
+
+      
+          <div class="account-properties">
+            <h3>Account Properties</h3>
+            <div class="checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="is_private">
+                Private Account
+              </label>
+
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="is_joined_recently">
+                Recently Joined
+              </label>
+
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="is_business_account">
+                Business Account
+              </label>
+
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="has_channel">
+                Has Channel
+              </label>
+
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="has_guides">
+                Has Guides
+              </label>
+
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="has_external_url">
+                Has External URL
+              </label>
+              
+            </div>
+          </div>
+
+          <button type="submit" class="analyze-button" [disabled]="!profileForm.valid || isLoading">
+            {{ isLoading ? 'Analyzing...' : 'Analyze Profile' }}
+          </button>
+        </form>
+
+        <!-- Results Section -->
+       <div class="analysis-results" *ngIf="analysisResult">
+  <h3>Analysis Results</h3>
+  <div class="result-card" [ngClass]="analysisResult.risk_assessment.overall_risk_level.toLowerCase()">
+    <!-- Main Result -->
+    <div class="result-header">
+      <div class="primary-result">
+        <h4>Account Status</h4>
+        <span class="status" [class.fake]="analysisResult.is_fake">
+          {{ analysisResult.is_fake ? 'Potentially Fake' : 'Likely Genuine' }}
+        </span>
+      </div>
+      <div class="confidence">
+        Confidence: {{ (analysisResult.confidence * 100).toFixed(1) }}%
+      </div>
+    </div>
+
+
+    <div class="metrics-section">
+      <h4>Account Metrics</h4>
+      <div class="metrics-grid">
+        <div class="metric">
+          <span class="label">Follower Ratio</span>
+          <span class="value">{{ analysisResult.ml_metrics.follower_ratio.toFixed(2) }}</span>
         </div>
-
-        <div class="input-content">
-          <div *ngIf="selectedInputType === 'text'" class="input-section">
-            <h3>Text Input</h3>
-            <textarea placeholder="Enter text here..." rows="5"></textarea>
-            <button class="submit-button">Submit</button>
-          </div>
-
-          <div *ngIf="selectedInputType === 'url'" class="input-section">
-            <h3>URL Input</h3>
-            <input type="url" placeholder="Enter URL here..." />
-            <button class="submit-button">Submit</button>
-          </div>
-
-          <div *ngIf="selectedInputType === 'image'" class="input-section">
-            <h3>Image Input</h3>
-            <app-image-input></app-image-input>
-            <button class="submit-button">Submit</button>
-          </div>
+        <div class="metric">
+          <span class="label">Account Type</span>
+          <span class="value">{{ analysisResult.ml_metrics.account_type }}</span>
         </div>
+        <div class="metric">
+          <span class="label">Risk Level</span>
+          <span class="value risk-level">{{ analysisResult.risk_assessment.overall_risk_level }}</span>
+        </div>
+      </div>
+    </div>
 
-        <div class="output-content">
-          <h3>Output</h3>
-          <div class="output-area">
-            <!-- This area will display extracted links and LLM-generated wordings -->
+
+    <div class="nlp-section" *ngIf="analysisResult.nlp_analysis">
+      <h4>Text Analysis</h4>
+      
+
+      <div class="analysis-block" *ngIf="analysisResult.nlp_analysis.username_analysis">
+        <h5>Username Analysis</h5>
+        <div class="analysis-grid">
+          <div class="metric">
+            <span class="label">Spam Score</span>
+            <span class="value">{{ analysisResult.nlp_analysis.username_analysis.has_spam_indicators }}</span>
+          </div>
+          <div class="metric">
+            <span class="label">Complexity</span>
+            <span class="value">{{ analysisResult.nlp_analysis.username_analysis.lexical_diversity.toFixed(2) }}</span>
           </div>
         </div>
       </div>
+
+
+      <div class="analysis-block" *ngIf="analysisResult.nlp_analysis.bio_analysis">
+        <h5>Bio Analysis</h5>
+        <div class="analysis-grid">
+          <div class="metric">
+            <span class="label">Spam Score</span>
+            <span class="value">{{ analysisResult.nlp_analysis.bio_analysis.has_spam_indicators }}</span>
+          </div>
+          <div class="metric">
+            <span class="label">Word Count</span>
+            <span class="value">{{ analysisResult.nlp_analysis.bio_analysis.token_count }}</span>
+          </div>
+          <div class="metric" *ngIf="analysisResult.nlp_analysis.bio_analysis.common_bigrams.length">
+            <span class="label">Common Phrases</span>
+            <ul class="bigrams-list">
+              <li *ngFor="let bigram of analysisResult.nlp_analysis.bio_analysis.common_bigrams">
+                {{ bigram }}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+      </div>
+    </div>
+
+      
     </div>
   </div>
