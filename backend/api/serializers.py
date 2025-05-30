@@ -21,3 +21,12 @@ class BatchURLSerializer(serializers.Serializer):
         child=serializers.URLField(),
         required=True
     )
+
+class ImageInputSerializer(serializers.Serializer):
+    image_url = serializers.URLField(required=False)
+    image_file = serializers.ImageField(required=False)
+
+    def validate(self, data):
+        if not data.get('image_url') and not data.get('image_file'):
+            raise serializers.ValidationError("Either 'image_url' or 'image_file' must be provided.")
+        return data

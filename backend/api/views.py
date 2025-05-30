@@ -223,3 +223,36 @@ class BatchURLRiskAssessmentView(APIView):
                 })
             return Response(results, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import ImageInputSerializer
+from .ocr_extractor import extract_valid_urls  # Import your OCR functionality
+import os
+
+class OCRExtractionView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = ImageInputSerializer(data=request.data)
+        if serializer.is_valid():
+            image_url = serializer.validated_data.get('image_url')
+            image_file = serializer.validated_data.get('image_file')
+
+            if image_url:
+                image_source = image_url
+            elif image_file:
+                # Save the uploaded file temporarily
+                temp_file_path = f"/tmp/{image_file.name}"
+                with open(temp_file_path, 'wb') as temp_file:
+                    temp_file.write(image_file.read())
+                image_source = temp_file_path
+
+            try:
+                urls_with_titles = extract_valid_urls(image_source)
+                if image_file:
+                    os.remove(image_source)  # Clean up temporary file
+                return Response({'urls': urls_with_titles}, status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
