@@ -11,3 +11,13 @@ class URLExtractionSerializer(serializers.Serializer):
     def extract_urls(self):
         from .utils.url_extractor import extract_urls
         return extract_urls(self.validated_data['text'])
+    
+
+class URLSerializer(serializers.Serializer):
+    url = serializers.URLField(required=True)
+
+class BatchURLSerializer(serializers.Serializer):
+    urls = serializers.ListField(
+        child=serializers.URLField(),
+        required=True
+    )

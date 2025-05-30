@@ -134,3 +134,92 @@ class AnalyzeInstagramProfileView(APIView):
                 {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+import joblib
+import os
+from .serializers import URLSerializer, BatchURLSerializer
+
+MODEL_PATH = os.path.join(os.path.dirname(__file__), 'trained_models', 'url_classifier_artifacts.joblib')
+
+def get_risk_assessment(prob):
+    """Get risk level, corresponding warning message, and remove color coding"""
+    if prob >= 0.8:
+        return {
+            'risk_level': 'HIGH',
+            'prediction': 'MALICIOUS',
+            'warning': 'DANGER: High risk of malicious content! Do not visit this URL.',
+            'recommendation': 'Block this URL immediately. Likely contains malware, phishing, or other threats.'
+        }
+    elif prob >= 0.6:
+        return {
+            'risk_level': 'MEDIUM-HIGH',
+            'prediction': 'MALICIOUS',
+            'warning': 'WARNING: Medium-high risk detected. Exercise extreme caution.',
+            'recommendation': 'Avoid visiting unless absolutely necessary. Scan with security tools first.'
+        }
+    elif prob >= 0.4:
+        return {
+            'risk_level': 'MEDIUM',
+            'prediction': 'BENIGN',
+            'warning': 'CAUTION: Medium risk detected. Proceed with caution.',
+            'recommendation': 'Use additional security measures. Verify the URL source before visiting.'
+        }
+    elif prob >= 0.2:
+        return {
+            'risk_level': 'LOW-MEDIUM',
+            'prediction': 'BENIGN',
+            'warning': 'NOTICE: Some suspicious indicators found.',
+            'recommendation': 'Generally safe but monitor for unusual behavior. Keep security tools active.'
+        }
+    else:
+        return {
+            'risk_level': 'LOW',
+            'prediction': 'BENIGN',
+            'warning': 'SAFE: Low risk detected. URL appears legitimate.',
+            'recommendation': 'URL appears safe to visit. Normal security precautions apply.'
+        }
+
+class SingleURLRiskAssessmentView(APIView):
+    def post(self, request):
+        serializer = URLSerializer(data=request.data)
+        if serializer.is_valid():
+            url = serializer.validated_data['url']
+            artifacts = joblib.load(MODEL_PATH)
+            X = artifacts['vectorizer'].transform([url])
+            prob = artifacts['model'].predict_proba(X)[0, 1]
+            assessment = get_risk_assessment(prob)
+            return Response({
+                'url': url,
+                'malicious_probability': prob,
+                'risk_level': assessment['risk_level'],
+                'prediction': assessment['prediction'],
+                'warning': assessment['warning'],
+                'recommendation': assessment['recommendation']
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class BatchURLRiskAssessmentView(APIView):
+    def post(self, request):
+        serializer = BatchURLSerializer(data=request.data)
+        if serializer.is_valid():
+            urls = serializer.validated_data['urls']
+            artifacts = joblib.load(MODEL_PATH)
+            X = artifacts['vectorizer'].transform(urls)
+            probs = artifacts['model'].predict_proba(X)[:, 1]
+            results = []
+            for url, prob in zip(urls, probs):
+                assessment = get_risk_assessment(prob)
+                results.append({
+                    'url': url,
+                    'malicious_probability': prob,
+                    'risk_level': assessment['risk_level'],
+                    'prediction': assessment['prediction'],
+                    'warning': assessment['warning'],
+                    'recommendation': assessment['recommendation']
+                })
+            return Response(results, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
