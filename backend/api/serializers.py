@@ -22,9 +22,12 @@ class BatchURLSerializer(serializers.Serializer):
         required=True
     )
 
+from rest_framework import serializers
+
 class ImageInputSerializer(serializers.Serializer):
     image_url = serializers.URLField(required=False)
     image_file = serializers.ImageField(required=False)
+    include_raw_text = serializers.BooleanField(required=False, default=False)
 
     def validate(self, data):
         if not data.get('image_url') and not data.get('image_file'):

@@ -2,7 +2,7 @@ import pytesseract
 import cv2
 import numpy as np
 from PIL import Image, ImageEnhance
-from typing import List, Dict
+from typing import List, Dict, Tuple
 import re
 import requests
 
@@ -54,24 +54,58 @@ class EnhancedTextExtractor:
 
         return processed_images
 
-    def extract_urls(self, image_source: str):
+    def extract_text_and_urls(self, image_source: str) -> Tuple[List[str], str]:
+        """Extract both URLs and raw text from image"""
         processed_images = self.aggressive_preprocess_image(image_source)
         all_urls = set()
+        unique_text_lines = set()
+        best_text = ""
+        max_text_length = 0
 
         tesseract_configs = [
             '--psm 3', '--psm 6', '--psm 7', '--psm 8', '--psm 11', '--psm 13'
         ]
 
-        for img in processed_images.values():
+        for img_name, img in processed_images.items():
             for config in tesseract_configs:
                 try:
                     text = pytesseract.image_to_string(img, config=config)
-                    urls = self.url_pattern.findall(text)
-                    all_urls.update(urls)
+                    if text.strip():
+                        # Find URLs in this text
+                        urls = self.url_pattern.findall(text)
+                        all_urls.update(urls)
+                        
+                        # Keep track of the longest/best text extraction
+                        if len(text.strip()) > max_text_length:
+                            max_text_length = len(text.strip())
+                            best_text = text.strip()
+                        
+                        # Also collect unique lines for fallback
+                        lines = [line.strip() for line in text.split('\n') if line.strip()]
+                        unique_text_lines.update(lines)
+                        
                 except Exception:
                     continue
-                    
-        return list(all_urls)
+
+        # Use the best (longest) text extraction, or fall back to unique lines
+        if best_text:
+            final_text = best_text
+        else:
+            # Sort lines to maintain some consistency
+            sorted_lines = sorted(unique_text_lines, key=len, reverse=True)
+            final_text = '\n'.join(sorted_lines)
+
+        # Clean up the text
+        final_text = re.sub(r'\n\s*\n+', '\n\n', final_text)  # Remove excessive line breaks
+        final_text = re.sub(r' +', ' ', final_text)  # Remove excessive spaces
+        final_text = re.sub(r'\n +', '\n', final_text)  # Remove spaces at start of lines
+
+        return list(all_urls), final_text.strip()
+
+    def extract_urls(self, image_source: str):
+        """Keep the original method for backward compatibility"""
+        urls, _ = self.extract_text_and_urls(image_source)
+        return urls
 
 def add_http_prefix(url):
     if not url.startswith(('http://', 'https://')):
@@ -89,15 +123,24 @@ def validate_url(url):
     except requests.RequestException:
         return None
 
-def extract_valid_urls(image_source: str) -> List[Dict[str, str]]:
+def extract_valid_urls_and_text(image_source: str) -> Dict[str, any]:
+    """Extract both validated URLs and raw text from image"""
     extractor = EnhancedTextExtractor()
-    raw_urls = extractor.extract_urls(image_source)
+    raw_urls, raw_text = extractor.extract_text_and_urls(image_source)
     validated_urls = []
-    
+
     for url in raw_urls:
         full_url = add_http_prefix(url)
         result = validate_url(full_url)
         if result:
             validated_urls.append(result)
-            
-    return validated_urls
+
+    return {
+        'urls': validated_urls,
+        'raw_text': raw_text
+    }
+
+def extract_valid_urls(image_source: str) -> List[Dict[str, str]]:
+    """Keep the original function for backward compatibility"""
+    result = extract_valid_urls_and_text(image_source)
+    return result['urls']

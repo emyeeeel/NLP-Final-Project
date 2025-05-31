@@ -229,7 +229,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import ImageInputSerializer
-from .ocr_extractor import extract_valid_urls  # Import your OCR functionality
+from .ocr_extractor import extract_valid_urls_and_text, extract_valid_urls  # Import both functions
 import os
 
 class OCRExtractionView(APIView):
@@ -238,6 +238,9 @@ class OCRExtractionView(APIView):
         if serializer.is_valid():
             image_url = serializer.validated_data.get('image_url')
             image_file = serializer.validated_data.get('image_file')
+            
+            # Check if raw_text is requested from validated data
+            include_raw_text = serializer.validated_data.get('include_raw_text', False)
 
             if image_url:
                 image_source = image_url
@@ -249,10 +252,24 @@ class OCRExtractionView(APIView):
                 image_source = temp_file_path
 
             try:
-                urls_with_titles = extract_valid_urls(image_source)
+                if include_raw_text:
+                    # Use the new function that returns both URLs and raw text
+                    result = extract_valid_urls_and_text(image_source)
+                    response_data = {
+                        'urls': result['urls'],
+                        'raw_text': result['raw_text']
+                    }
+                else:
+                    # Use the original function for backward compatibility
+                    urls_with_titles = extract_valid_urls(image_source)
+                    response_data = {'urls': urls_with_titles}
+                
                 if image_file:
                     os.remove(image_source)  # Clean up temporary file
-                return Response({'urls': urls_with_titles}, status=status.HTTP_200_OK)
+                
+                return Response(response_data, status=status.HTTP_200_OK)
             except Exception as e:
+                if image_file and os.path.exists(image_source):
+                    os.remove(image_source)  # Clean up on error
                 return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

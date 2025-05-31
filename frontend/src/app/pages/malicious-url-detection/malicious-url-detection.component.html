@@ -130,9 +130,9 @@
             </div>
 
             <!-- Display API Response -->
-            <div *ngIf="apiResponse" class="response-section">
+            <div *ngIf="extractedRawText" class="response-section">
               <h3>Raw Text:</h3>
-              <pre class="response-text">{{ apiResponse }}</pre>
+              <pre class="response-text">{{ extractedRawText }}</pre>
             </div>
 
             <!-- Display Extracted URLs -->

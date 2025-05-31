@@ -37,6 +37,7 @@ interface ImageInput {
 
 interface OcrResponse {
   urls: ExtractedUrl[];
+  raw_text: string;
 }
 
 interface ExtractedUrl {
@@ -132,11 +133,8 @@ export class MaliciousUrlDetectionComponent implements OnInit, OnDestroy {
     this.selectedFiles = files;
   }
 
-
-    /**
-   * Send data to OCR API
-   */
   async sendToOCR(imageInput: ImageInput): Promise<void> {
+    this.isLoading = true;
     try {
       
       let requestData: any;
@@ -145,7 +143,8 @@ export class MaliciousUrlDetectionComponent implements OnInit, OnDestroy {
       if (imageInput.inputType === 'url') {
         // For URL inputs, send as JSON
         requestData = {
-          image_url: imageInput.filePath
+          image_url: imageInput.filePath,
+          "include_raw_text": true
         };
         headers['Content-Type'] = 'application/json';
       } else {
@@ -153,6 +152,7 @@ export class MaliciousUrlDetectionComponent implements OnInit, OnDestroy {
         const formData = new FormData();
         if (imageInput.file) {
           formData.append('image_file', imageInput.file);
+          formData.append('include_raw_text', 'true');
         }
         requestData = formData;
         // Don't set Content-Type header for FormData - let browser set it with boundary
@@ -160,6 +160,9 @@ export class MaliciousUrlDetectionComponent implements OnInit, OnDestroy {
 
       const response = await this.http.post<OcrResponse>('http://127.0.0.1:8000/api/extract-urls/ocr/', requestData, { headers }).toPromise();
       console.log('OCR Response:', response);
+
+      this.extractedRawText = response!.raw_text;
+      console.log(this.extractedRawText)
 
       if (response && response.urls && response.urls.length > 0) {
         // Extract URLs and add them to your extractedUrls array
@@ -172,7 +175,19 @@ export class MaliciousUrlDetectionComponent implements OnInit, OnDestroy {
         });
         
         // // Process the URLs for risk assessment if needed
-        // this.processExtractedUrls();
+        const riskAssessmentApiUrl = 'http://localhost:8000/api/risk-assessment/batch/';
+                this.http.post<RiskAssessmentResponse[]>(riskAssessmentApiUrl, { urls: this.extractedUrls }).subscribe(
+                    (response) => {
+                        console.log('Risk Assessment Response:', response);
+                        this.detectionResponse = response;
+                        this.isLoading = false;
+                    },
+                    (error) => {
+                        console.error('Error occurred while assessing risk:', error);
+                        alert('Failed to assess risk for the URLs.');
+                        this.isLoading = false;
+                    }
+                );
       }
       
     } catch (error) {
