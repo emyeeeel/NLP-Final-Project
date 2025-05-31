@@ -26,6 +26,25 @@ interface RiskAssessmentResponse {
   recommendation: string;
 }
 
+interface ImageInput {
+  file?: File;
+  name: string;
+  size?: number;
+  preview: string;
+  inputType: 'file' | 'url';
+  filePath: string;
+}
+
+interface OcrResponse {
+  urls: ExtractedUrl[];
+}
+
+interface ExtractedUrl {
+  url: string;
+  title: string;
+}
+
+
 @Component({
   selector: 'app-malicious-url-detection',
   imports: [CommonModule, ImageInputComponent, FormsModule],
@@ -103,6 +122,73 @@ export class MaliciousUrlDetectionComponent implements OnInit, OnDestroy {
         return `https://${url}`;
       }
       return url;
+    });
+  }
+
+  selectedFiles: ImageInput[] = [];
+
+  onFilesSelected(files: ImageInput[]): void {
+    console.log('Selected files:', files);
+    this.selectedFiles = files;
+  }
+
+
+    /**
+   * Send data to OCR API
+   */
+  async sendToOCR(imageInput: ImageInput): Promise<void> {
+    try {
+      
+      let requestData: any;
+      let headers: any = {};
+      
+      if (imageInput.inputType === 'url') {
+        // For URL inputs, send as JSON
+        requestData = {
+          image_url: imageInput.filePath
+        };
+        headers['Content-Type'] = 'application/json';
+      } else {
+        // For file uploads, send as FormData
+        const formData = new FormData();
+        if (imageInput.file) {
+          formData.append('image_file', imageInput.file);
+        }
+        requestData = formData;
+        // Don't set Content-Type header for FormData - let browser set it with boundary
+      }
+
+      const response = await this.http.post<OcrResponse>('http://127.0.0.1:8000/api/extract-urls/ocr/', requestData, { headers }).toPromise();
+      console.log('OCR Response:', response);
+
+      if (response && response.urls && response.urls.length > 0) {
+        // Extract URLs and add them to your extractedUrls array
+        const urlsFromOcr = response.urls.map(item => item.url);
+        this.extractedUrls = [...this.extractedUrls, ...urlsFromOcr];
+        
+        // You can also access titles if needed
+        response.urls.forEach(item => {
+          console.log(`URL: ${item.url}, Title: ${item.title}`);
+        });
+        
+        // // Process the URLs for risk assessment if needed
+        // this.processExtractedUrls();
+      }
+      
+    } catch (error) {
+      console.error('Error sending to OCR API:', error);
+      alert('Failed to process image with OCR API');
+    } finally {
+    }
+  }
+
+  /**
+   * Process selected images
+   */
+  processImages(): void {
+    console.log('clicked')
+    this.selectedFiles.forEach(imageInput => {
+      this.sendToOCR(imageInput);
     });
   }
 

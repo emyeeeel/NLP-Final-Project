@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core'; 
+import { Component, ElementRef, ViewChild, Output, EventEmitter } from '@angular/core'; 
 import { FormsModule } from '@angular/forms'; 
 import { CommonModule } from '@angular/common'; 
 import { HttpClient } from '@angular/common/http';
@@ -23,6 +23,9 @@ interface ImageInput {
 })
 export class ImageInputComponent {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
+  // Output selectedFiles to parent components
+  @Output() filesSelected = new EventEmitter<ImageInput[]>();
 
   // Component state
   selectedFiles: ImageInput[] = [];
@@ -140,6 +143,7 @@ export class ImageInputComponent {
       );
       
       this.selectedFiles = [...this.selectedFiles, ...filesWithPreview];
+      this.filesSelected.emit(this.selectedFiles); // Emit the updated selectedFiles
       this.showUrlInput = false;
     }
   }
@@ -199,6 +203,7 @@ export class ImageInputComponent {
    */
   removeFile(index: number): void {
     this.selectedFiles.splice(index, 1);
+    this.filesSelected.emit(this.selectedFiles); // Emit the updated selectedFiles
   }
 
   /**
@@ -229,6 +234,7 @@ export class ImageInputComponent {
       };
 
       this.selectedFiles.push(urlImageInput);
+      this.filesSelected.emit(this.selectedFiles); // Emit the updated selectedFiles
       this.showUrlInput = false;
       this.imageUrl = '';
     } catch (error) {
@@ -239,51 +245,51 @@ export class ImageInputComponent {
     }
   }
 
-  /**
-   * Send data to OCR API
-   */
-  async sendToOCR(imageInput: ImageInput): Promise<void> {
-    try {
-      this.isProcessing = true;
+  // /**
+  //  * Send data to OCR API
+  //  */
+  // async sendToOCR(imageInput: ImageInput): Promise<void> {
+  //   try {
+  //     this.isProcessing = true;
       
-      let requestData: any;
-      let headers: any = {};
+  //     let requestData: any;
+  //     let headers: any = {};
       
-      if (imageInput.inputType === 'url') {
-        // For URL inputs, send as JSON
-        requestData = {
-          image_url: imageInput.filePath
-        };
-        headers['Content-Type'] = 'application/json';
-      } else {
-        // For file uploads, send as FormData
-        const formData = new FormData();
-        if (imageInput.file) {
-          formData.append('image_file', imageInput.file);
-        }
-        requestData = formData;
-        // Don't set Content-Type header for FormData - let browser set it with boundary
-      }
+  //     if (imageInput.inputType === 'url') {
+  //       // For URL inputs, send as JSON
+  //       requestData = {
+  //         image_url: imageInput.filePath
+  //       };
+  //       headers['Content-Type'] = 'application/json';
+  //     } else {
+  //       // For file uploads, send as FormData
+  //       const formData = new FormData();
+  //       if (imageInput.file) {
+  //         formData.append('image_file', imageInput.file);
+  //       }
+  //       requestData = formData;
+  //       // Don't set Content-Type header for FormData - let browser set it with boundary
+  //     }
 
-      const response = await this.http.post('http://127.0.0.1:8000/api/extract-urls/ocr/', requestData, { headers }).toPromise();
-      console.log('OCR Response:', response);
+  //     const response = await this.http.post('http://127.0.0.1:8000/api/extract-urls/ocr/', requestData, { headers }).toPromise();
+  //     console.log('OCR Response:', response);
       
-    } catch (error) {
-      console.error('Error sending to OCR API:', error);
-      alert('Failed to process image with OCR API');
-    } finally {
-      this.isProcessing = false;
-    }
-  }
+  //   } catch (error) {
+  //     console.error('Error sending to OCR API:', error);
+  //     alert('Failed to process image with OCR API');
+  //   } finally {
+  //     this.isProcessing = false;
+  //   }
+  // }
 
-  /**
-   * Process selected images
-   */
-  processImages(): void {
-    this.selectedFiles.forEach(imageInput => {
-      this.sendToOCR(imageInput);
-    });
-  }
+  // /**
+  //  * Process selected images
+  //  */
+  // processImages(): void {
+  //   this.selectedFiles.forEach(imageInput => {
+  //     this.sendToOCR(imageInput);
+  //   });
+  // }
 
   /**
    * Format file size for display

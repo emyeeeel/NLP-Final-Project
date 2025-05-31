@@ -114,8 +114,8 @@
 
           <div *ngIf="selectedInputType === 'image'" class="input-section">
             <h3>Image Input</h3>
-            <app-image-input></app-image-input>
-            <button class="submit-button">Submit</button>
+            <app-image-input (filesSelected)="onFilesSelected($event)"></app-image-input>
+            <button class="submit-button" (click)="processImages()">Submit</button>
           </div>
         </div>
 
