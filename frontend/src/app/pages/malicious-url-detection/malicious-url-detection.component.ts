@@ -13,8 +13,38 @@ interface ApiResponse {
     text: string;
     external_links?: Array<{ url: string; text: string }>;
     method?: string;
+    error?: string; 
   };
 }
+
+interface RiskAssessmentResponse {
+  url: string;
+  malicious_probability: number;
+  risk_level: string;
+  prediction: string;
+  warning: string;
+  recommendation: string;
+}
+
+interface ImageInput {
+  file?: File;
+  name: string;
+  size?: number;
+  preview: string;
+  inputType: 'file' | 'url';
+  filePath: string;
+}
+
+interface OcrResponse {
+  urls: ExtractedUrl[];
+  raw_text: string;
+}
+
+interface ExtractedUrl {
+  url: string;
+  title: string;
+}
+
 
 @Component({
   selector: 'app-malicious-url-detection',
@@ -60,8 +90,17 @@ export class MaliciousUrlDetectionComponent implements OnInit, OnDestroy {
 
   selectedInputType: string = 'text'; 
   
-  selectInputType(type: string): void {
-    this.selectedInputType = type;
+  selectInputType(inputType: string): void {
+    this.selectedInputType = inputType;
+  
+    // Reset input fields
+    this.textInput = '';
+    this.urlInput = '';
+    
+    // Reset output variables
+    this.apiResponse = null;
+    this.extractedUrls = [];
+    this.detectionResponse = [];
   }
 
   logout() {
@@ -70,74 +109,198 @@ export class MaliciousUrlDetectionComponent implements OnInit, OnDestroy {
   
   textInput: string = '';
   urlInput: string = ''; 
+  extractedRawText: any = null;  
   apiResponse: any = null; 
-
-  extractUrlsFromApiResponse(): void {
-    if (!this.apiResponse) {
-      alert('No text available to extract URLs.');
-      return;
-    }
-  
-    const extractUrlsApiUrl = 'http://localhost:8000/api/extract-urls/';
-    this.http.post<{ urls: string[] }>(extractUrlsApiUrl, { text: this.apiResponse }).subscribe(
-      (response) => {
-        console.log('Extracted URLs:', response.urls);
-        this.extractedUrls = response.urls; // Store the extracted URLs for display
-      },
-      (error) => {
-        console.error('Error occurred while extracting URLs:', error);
-        alert('Failed to extract URLs from the API.');
-      }
-    );
-  }
-  
-  // Add a property to store extracted URLs
+  detectionResponse: RiskAssessmentResponse[] = [];
+  errorMessage: string = '';
   extractedUrls: string[] = [];
-  
-  // Modify detectMaliciousUrl to call extractUrlsFromApiResponse after fetching the text
-  detectMaliciousUrl(): void {
-    console.log("Enter function");
-    if (!this.urlInput) {
-      alert('Please enter a URL.');
-      return;
-    }
-  
-    const apiUrl = 'http://localhost:8000/api/scrape-tweet/';
-    this.http.post<ApiResponse>(apiUrl, { url: this.urlInput }).subscribe(
-      (response) => {
-        this.apiResponse = response.data.text || 'No text found';
-        console.log('Extracted Text:', this.apiResponse);
-  
-        // Call the method to extract URLs
-        this.extractUrlsFromApiResponse();
-      },
-      (error) => {
-        console.error('Error occurred:', error);
-        alert('Failed to fetch data from the API.');
+  isLoading = false;
+
+  // Helper function to ensure URLs have valid headers
+  private ensureValidUrlHeaders(urls: string[]): string[] {
+    return urls.map(url => {
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        return `https://${url}`;
       }
-    );
+      return url;
+    });
   }
 
- 
-  postTextToExtractUrlsApi(): void {
-    if (!this.textInput) {
-      alert('No text provided to extract URLs.');
-      return;
-    }
+  selectedFiles: ImageInput[] = [];
 
-    this.apiResponse = this.textInput;
-  
-    const extractUrlsApiUrl = 'http://localhost:8000/api/extract-urls/';
-    this.http.post<{ urls: string[] }>(extractUrlsApiUrl, { text: this.textInput }).subscribe(
-      (response) => {
-        console.log('Extracted URLs:', response.urls);
-        this.extractedUrls = response.urls; // Store the extracted URLs for display
-      },
-      (error) => {
-        console.error('Error occurred while extracting URLs:', error);
-        alert('Failed to extract URLs from the API.');
-      }
-    );
+  onFilesSelected(files: ImageInput[]): void {
+    console.log('Selected files:', files);
+    this.selectedFiles = files;
   }
 
+  async sendToOCR(imageInput: ImageInput): Promise<void> {
+    this.isLoading = true;
+    try {
+      
+      let requestData: any;
+      let headers: any = {};
+      
+      if (imageInput.inputType === 'url') {
+        // For URL inputs, send as JSON
+        requestData = {
+          image_url: imageInput.filePath,
+          "include_raw_text": true
+        };
+        headers['Content-Type'] = 'application/json';
+      } else {
+        // For file uploads, send as FormData
+        const formData = new FormData();
+        if (imageInput.file) {
+          formData.append('image_file', imageInput.file);
+          formData.append('include_raw_text', 'true');
+        }
+        requestData = formData;
+        // Don't set Content-Type header for FormData - let browser set it with boundary
+      }
+
+      const response = await this.http.post<OcrResponse>('http://127.0.0.1:8000/api/extract-urls/ocr/', requestData, { headers }).toPromise();
+      console.log('OCR Response:', response);
+
+      this.extractedRawText = response!.raw_text;
+      console.log(this.extractedRawText)
+
+      if (response && response.urls && response.urls.length > 0) {
+        // Extract URLs and add them to your extractedUrls array
+        const urlsFromOcr = response.urls.map(item => item.url);
+        this.extractedUrls = [...this.extractedUrls, ...urlsFromOcr];
+        
+        // You can also access titles if needed
+        response.urls.forEach(item => {
+          console.log(`URL: ${item.url}, Title: ${item.title}`);
+        });
+        
+        // // Process the URLs for risk assessment if needed
+        const riskAssessmentApiUrl = 'http://localhost:8000/api/risk-assessment/batch/';
+                this.http.post<RiskAssessmentResponse[]>(riskAssessmentApiUrl, { urls: this.extractedUrls }).subscribe(
+                    (response) => {
+                        console.log('Risk Assessment Response:', response);
+                        this.detectionResponse = response;
+                        this.isLoading = false;
+                    },
+                    (error) => {
+                        console.error('Error occurred while assessing risk:', error);
+                        alert('Failed to assess risk for the URLs.');
+                        this.isLoading = false;
+                    }
+                );
+      }
+      
+    } catch (error) {
+      console.error('Error sending to OCR API:', error);
+      alert('Failed to process image with OCR API');
+    } finally {
+    }
+  }
+
+  /**
+   * Process selected images
+   */
+  processImages(): void {
+    console.log('clicked')
+    this.selectedFiles.forEach(imageInput => {
+      this.sendToOCR(imageInput);
+    });
+  }
+
+  processURLinput(): void {
+    this.isLoading = true;
+    setTimeout(() => {
+        if (!this.urlInput) {
+            alert('Please enter a URL.');
+            this.isLoading = false;
+            return;
+        }
+
+        const apiUrl = 'http://localhost:8000/api/scrape-tweet/';
+        this.http.post<ApiResponse>(apiUrl, { url: this.urlInput }).subscribe(
+            (response) => {
+                if (response.data.error) {
+                    this.apiResponse = response.data.error;
+                    this.isLoading = false;
+                    return;
+                }
+                this.apiResponse = response.data.text || 'No text found';
+                this.extractedRawText = this.apiResponse;
+                console.log('API Response:', response.data.external_links);
+                //loop over response.data.external_links?.length and append external links['url'] to this.extractedUrls
+                console.log('Extracted Raw Text:', this.extractedRawText);
+                if (this.extractedRawText === 'No text found') {
+                    this.isLoading = false;
+                    return;
+                }
+
+                if (response.data.external_links && response.data.external_links.length > 0) {
+                  response.data.external_links.forEach(link => {
+                      if (link.url) {
+                          this.extractedUrls.push(link.url);
+                      }
+                  });
+              }
+              console.log(this.extractedUrls)
+                
+                        const riskAssessmentApiUrl = 'http://localhost:8000/api/risk-assessment/batch/';
+                        this.http.post<RiskAssessmentResponse[]>(riskAssessmentApiUrl, { urls: this.extractedUrls }).subscribe(
+                            (response) => {
+                                console.log('Risk Assessment Response:', response);
+                                this.detectionResponse = response;
+                                this.isLoading = false;
+                            },
+                            (error) => {
+                                console.error('Error occurred while assessing risk:', error);
+                                alert('Failed to assess risk for the URLs.');
+                                this.isLoading = false;
+                            }
+                        );
+            },
+            (error) => {
+                console.error('Error occurred:', error);
+                alert('Failed to fetch data from the API.');
+                this.isLoading = false;
+            }
+        );
+    }, 2000); // 2-second timeout
+}
+
+  processTextInput(): void{
+    this.isLoading = true;
+    setTimeout(() => {
+        const extractUrlsApiUrl = 'http://localhost:8000/api/extract-urls/';
+        this.http.post<{ urls: string[] }>(extractUrlsApiUrl, { text: this.textInput }).subscribe(
+            (response) => {
+                console.log('Extracted URLs:', response.urls);
+                this.extractedUrls = this.ensureValidUrlHeaders(response.urls);
+
+                if (!this.extractedUrls || this.extractedUrls.length === 0) {
+                    alert('No URLs available for analysis.');
+                    this.isLoading = false;
+                    return;
+                }
+
+                const riskAssessmentApiUrl = 'http://localhost:8000/api/risk-assessment/batch/';
+                this.http.post<RiskAssessmentResponse[]>(riskAssessmentApiUrl, { urls: this.extractedUrls }).subscribe(
+                    (response) => {
+                        console.log('Risk Assessment Response:', response);
+                        this.detectionResponse = response;
+                        this.isLoading = false;
+                    },
+                    (error) => {
+                        console.error('Error occurred while assessing risk:', error);
+                        alert('Failed to assess risk for the URLs.');
+                        this.isLoading = false;
+                    }
+                );
+            },
+            (error) => {
+                console.error('Error occurred while extracting URLs:', error);
+                alert('Failed to extract URLs from the API.');
+                this.isLoading = false;
+            }
+        );
+    }, 2000); // 2-second timeout
+}
 }

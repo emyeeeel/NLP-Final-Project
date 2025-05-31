@@ -45,23 +45,24 @@
                   height="18">
               </div>
             </div>
+            
             <!-- URL Input State -->
-          <div class="url-input-section" *ngIf="showUrlInput">
-            <input 
-              type="url" 
-              [(ngModel)]="imageUrl" 
-              placeholder="Enter image URL"
-              class="url-input"
-              (click)="$event.stopPropagation()">
-            <div class="url-buttons">
-              <button (click)="loadFromUrl(); $event.stopPropagation()" [disabled]="!imageUrl" class="load-btn">
-                Load Image
-              </button>
-              <button (click)="toggleUrlInput(); $event.stopPropagation()" class="cancel-btn">
-                Cancel
-              </button>
+            <div class="url-input-section" *ngIf="showUrlInput">
+              <input 
+                type="url" 
+                [(ngModel)]="imageUrl" 
+                placeholder="Enter image URL"
+                class="url-input"
+                (click)="$event.stopPropagation()">
+              <div class="url-buttons">
+                <button (click)="loadFromUrl(); $event.stopPropagation()" [disabled]="!imageUrl" class="load-btn">
+                  Load Image
+                </button>
+                <button (click)="toggleUrlInput(); $event.stopPropagation()" class="cancel-btn">
+                  Cancel
+                </button>
+              </div>
             </div>
-          </div>
           </div>
 
           <!-- Processing State -->
@@ -76,36 +77,12 @@
               <img [src]="file.preview" alt="Preview" class="preview-image">
               <div class="file-info">
                 <p class="file-name">{{ file.name }}</p>
-                <p class="file-size">{{ formatFileSize(file.size) }}</p>
+                <p class="file-size" *ngIf="file.size">{{ formatFileSize(file.size) }}</p>
               </div>
               <button class="remove-file" (click)="removeFile(i); $event.stopPropagation()">×</button>
             </div>
-            <button class="process-btn" (click)="processImages(); $event.stopPropagation()">
-              Extract Text
-            </button>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Results Section -->
-  <div class="results-section" *ngIf="extractedText">
-    <h3>Extracted Text:</h3>
-    <div class="text-output">
-      <textarea 
-        [(ngModel)]="extractedText" 
-        readonly 
-        class="extracted-text-area"
-        rows="10">
-      </textarea>
-      <div class="text-actions">
-        <button (click)="copyToClipboard()" class="copy-btn">
-          {{ copySuccess ? 'Copied!' : 'Copy Text' }}
-        </button>
-        <button (click)="downloadText()" class="download-btn">
-          Download as TXT
-        </button>
       </div>
     </div>
   </div>

@@ -1,12 +1,15 @@
-import { Component, ElementRef, ViewChild } from '@angular/core'; 
+import { Component, ElementRef, ViewChild, Output, EventEmitter } from '@angular/core'; 
 import { FormsModule } from '@angular/forms'; 
 import { CommonModule } from '@angular/common'; 
+import { HttpClient } from '@angular/common/http';
 
-interface FileWithPreview {
-  file: File;
+interface ImageInput {
+  file?: File;
   name: string;
-  size: number;
+  size?: number;
   preview: string;
+  inputType: 'file' | 'url';
+  filePath: string;
 }
 
 @Component({
@@ -21,14 +24,15 @@ interface FileWithPreview {
 export class ImageInputComponent {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
+  // Output selectedFiles to parent components
+  @Output() filesSelected = new EventEmitter<ImageInput[]>();
+
   // Component state
-  selectedFiles: FileWithPreview[] = [];
+  selectedFiles: ImageInput[] = [];
   isDragOver = false;
   showUrlInput = false;
   imageUrl = '';
   isProcessing = false;
-  extractedText = '';
-  copySuccess = false;
 
   // Supported file types
   private supportedTypes = [
@@ -43,7 +47,7 @@ export class ImageInputComponent {
   // Maximum file size (10MB)
   private maxFileSize = 10 * 1024 * 1024;
 
-  constructor() {
+  constructor(private http: HttpClient) {
     // Listen for paste events
     document.addEventListener('paste', (e) => this.onPaste(e));
   }
@@ -139,6 +143,7 @@ export class ImageInputComponent {
       );
       
       this.selectedFiles = [...this.selectedFiles, ...filesWithPreview];
+      this.filesSelected.emit(this.selectedFiles); // Emit the updated selectedFiles
       this.showUrlInput = false;
     }
   }
@@ -163,7 +168,7 @@ export class ImageInputComponent {
   /**
    * Create file preview object
    */
-  private async createFilePreview(file: File): Promise<FileWithPreview> {
+  private async createFilePreview(file: File): Promise<ImageInput> {
     return new Promise((resolve) => {
       const reader = new FileReader();
       
@@ -172,17 +177,20 @@ export class ImageInputComponent {
           file,
           name: file.name,
           size: file.size,
-          preview: e.target?.result as string
+          preview: e.target?.result as string,
+          inputType: 'file',
+          filePath: file.name // For files, you might want to use file.name or a generated path
         });
       };
 
       if (file.type === 'application/pdf') {
-        // For PDF files, use a placeholder image
         resolve({
           file,
           name: file.name,
           size: file.size,
-          preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iNCIgZmlsbD0iI0Y3REJEQSI+PC9yZWN0Pgo8dGV4dCB4PSIzMCIgeT0iMzUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiNEQzI2MjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlBERjwvdGV4dD4KPC9zdmc+Cg=='
+          preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iNCIgZmlsbD0iI0Y3REJEQSI+PC9yZWN0Pgo8dGV4dCB4PSIzMCIgeT0iMzUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiNEQzI2MjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlBERjwvdGV4dD4KPC9zdmc+Cg==',
+          inputType: 'file',
+          filePath: file.name
         });
       } else {
         reader.readAsDataURL(file);
@@ -195,9 +203,7 @@ export class ImageInputComponent {
    */
   removeFile(index: number): void {
     this.selectedFiles.splice(index, 1);
-    if (this.selectedFiles.length === 0) {
-      this.extractedText = '';
-    }
+    this.filesSelected.emit(this.selectedFiles); // Emit the updated selectedFiles
   }
 
   /**
@@ -219,27 +225,18 @@ export class ImageInputComponent {
     try {
       this.isProcessing = true;
       
-      // Fetch the image to validate it
-      const response = await fetch(this.imageUrl);
-      if (!response.ok) {
-        throw new Error('Failed to load image from URL');
-      }
+      // Create ImageInput for URL
+      const urlImageInput: ImageInput = {
+        name: 'URL Image',
+        preview: this.imageUrl, // Use URL directly as preview
+        inputType: 'url',
+        filePath: this.imageUrl // For URLs, filePath is the URL itself
+      };
 
-      const blob = await response.blob();
-      
-      if (!blob.type.startsWith('image/')) {
-        throw new Error('URL does not point to a valid image');
-      }
-
-      // Create a file from the blob
-      const file = new File([blob], 'url-image.jpg', { type: blob.type });
-      
-      if (this.validateFile(file)) {
-        const fileWithPreview = await this.createFilePreview(file);
-        this.selectedFiles.push(fileWithPreview);
-        this.showUrlInput = false;
-        this.imageUrl = '';
-      }
+      this.selectedFiles.push(urlImageInput);
+      this.filesSelected.emit(this.selectedFiles); // Emit the updated selectedFiles
+      this.showUrlInput = false;
+      this.imageUrl = '';
     } catch (error) {
       console.error('Error loading image from URL:', error);
       alert('Failed to load image from URL. Please check the URL and try again.');
@@ -248,80 +245,51 @@ export class ImageInputComponent {
     }
   }
 
-  /**
-   * Process images for text extraction
-   * Note: This is a mock implementation. In a real app, you would integrate with OCR services
-   */
-  async processImages(): Promise<void> {
-    if (this.selectedFiles.length === 0) return;
-
-    this.isProcessing = true;
-    this.extractedText = '';
-
-    try {
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Mock text extraction - in reality, you'd call an OCR API
-      const mockTexts = [
-        "Sample extracted text from your image. In a real implementation, this would be the actual OCR result.",
-        "This is a demonstration of text extraction functionality.",
-        "Integration with services like Google Vision API, AWS Textract, or Tesseract.js would provide real OCR capabilities.",
-        "The extracted text would appear here after processing your uploaded images."
-      ];
-
-      this.extractedText = mockTexts[Math.floor(Math.random() * mockTexts.length)];
+  // /**
+  //  * Send data to OCR API
+  //  */
+  // async sendToOCR(imageInput: ImageInput): Promise<void> {
+  //   try {
+  //     this.isProcessing = true;
       
-      // For demonstration, add file names
-      const fileNames = this.selectedFiles.map(f => f.name).join(', ');
-      this.extractedText += `\n\nProcessed files: ${fileNames}`;
-
-    } catch (error) {
-      console.error('Error processing images:', error);
-      alert('Failed to process images. Please try again.');
-    } finally {
-      this.isProcessing = false;
-    }
-  }
-
-  /**
-   * Copy extracted text to clipboard
-   */
-  async copyToClipboard(): Promise<void> {
-    if (!this.extractedText) return;
-
-    try {
-      await navigator.clipboard.writeText(this.extractedText);
-      this.copySuccess = true;
+  //     let requestData: any;
+  //     let headers: any = {};
       
-      // Reset copy success indicator after 2 seconds
-      setTimeout(() => {
-        this.copySuccess = false;
-      }, 2000);
-    } catch (error) {
-      console.error('Failed to copy text:', error);
-      alert('Failed to copy text to clipboard');
-    }
-  }
+  //     if (imageInput.inputType === 'url') {
+  //       // For URL inputs, send as JSON
+  //       requestData = {
+  //         image_url: imageInput.filePath
+  //       };
+  //       headers['Content-Type'] = 'application/json';
+  //     } else {
+  //       // For file uploads, send as FormData
+  //       const formData = new FormData();
+  //       if (imageInput.file) {
+  //         formData.append('image_file', imageInput.file);
+  //       }
+  //       requestData = formData;
+  //       // Don't set Content-Type header for FormData - let browser set it with boundary
+  //     }
 
-  /**
-   * Download extracted text as TXT file
-   */
-  downloadText(): void {
-    if (!this.extractedText) return;
+  //     const response = await this.http.post('http://127.0.0.1:8000/api/extract-urls/ocr/', requestData, { headers }).toPromise();
+  //     console.log('OCR Response:', response);
+      
+  //   } catch (error) {
+  //     console.error('Error sending to OCR API:', error);
+  //     alert('Failed to process image with OCR API');
+  //   } finally {
+  //     this.isProcessing = false;
+  //   }
+  // }
 
-    const blob = new Blob([this.extractedText], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    
-    link.href = url;
-    link.download = `extracted-text-${new Date().getTime()}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-  }
+  // /**
+  //  * Process selected images
+  //  */
+  // processImages(): void {
+  //   this.selectedFiles.forEach(imageInput => {
+  //     this.sendToOCR(imageInput);
+  //   });
+  // }
 
   /**
    * Format file size for display

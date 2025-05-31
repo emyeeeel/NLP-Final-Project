@@ -103,36 +103,58 @@
           <div *ngIf="selectedInputType === 'text'" class="input-section">
             <h3>Text Input</h3>
             <textarea placeholder="Enter text here..." rows="5" [(ngModel)]="textInput"></textarea>
-            <button class="submit-button" (click)="postTextToExtractUrlsApi()">Submit</button>
+            <button class="submit-button" (click)="processTextInput()">Submit</button>
           </div>
 
           <div *ngIf="selectedInputType === 'url'" class="input-section">
             <h3>URL Input</h3>
             <input type="url" placeholder="Enter URL here..." [(ngModel)]="urlInput" />
-            <button class="submit-button" (click)="detectMaliciousUrl()">Submit</button>
+            <button class="submit-button" (click)="processURLinput()">Submit</button>
           </div>
 
           <div *ngIf="selectedInputType === 'image'" class="input-section">
             <h3>Image Input</h3>
-            <app-image-input></app-image-input>
-            <button class="submit-button">Submit</button>
+            <app-image-input (filesSelected)="onFilesSelected($event)"></app-image-input>
+            <button class="submit-button" (click)="processImages()">Submit</button>
           </div>
         </div>
 
         <div class="output-content">
           <h3>Output</h3>
           <div class="output-area">
+
+            <!-- Loader -->
+            <div *ngIf="isLoading" class="loader">
+              <div class="spinner"></div>
+              <p>Loading...</p>
+            </div>
+
             <!-- Display API Response -->
-            <div *ngIf="apiResponse">
+            <div *ngIf="extractedRawText" class="response-section">
               <h3>Raw Text:</h3>
-              <pre>{{ apiResponse }}</pre>
+              <pre class="response-text">{{ extractedRawText }}</pre>
             </div>
 
             <!-- Display Extracted URLs -->
-            <div *ngIf="extractedUrls.length > 0">
+            <div *ngIf="extractedUrls.length > 0" class="response-section">
               <h3>Extracted URLs:</h3>
-              <ul>
-                <li *ngFor="let url of extractedUrls">{{ url }}</li>
+              <ul class="url-list">
+                <li *ngFor="let url of extractedUrls" class="url-item">{{ url }}</li>
+              </ul>
+            </div>
+
+            <!-- Display Detection Analysis -->
+            <div *ngIf="detectionResponse && detectionResponse.length > 0" class="response-section">
+              <h3>Risk Assessment Analysis:</h3>
+              <ul class="risk-assessment-list">
+                <li *ngFor="let result of detectionResponse" class="risk-assessment-item">
+                  <p><strong>URL:</strong> {{ result.url }}</p>
+                  <p><strong>Malicious Probability:</strong> {{ result.malicious_probability | percent:'1.2-2' }}</p>
+                  <p><strong>Risk Level:</strong> {{ result.risk_level }}</p>
+                  <p><strong>Prediction:</strong> {{ result.prediction }}</p>
+                  <p><strong>Warning:</strong> {{ result.warning }}</p>
+                  <p><strong>Recommendation:</strong> {{ result.recommendation }}</p>
+                </li>
               </ul>
             </div>
           </div>
