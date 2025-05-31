@@ -125,24 +125,23 @@ export class MaliciousUrlDetectionComponent implements OnInit, OnDestroy {
                 }
                 this.apiResponse = response.data.text || 'No text found';
                 this.extractedRawText = this.apiResponse;
+                console.log('API Response:', response.data.external_links);
+                //loop over response.data.external_links?.length and append external links['url'] to this.extractedUrls
                 console.log('Extracted Raw Text:', this.extractedRawText);
                 if (this.extractedRawText === 'No text found') {
                     this.isLoading = false;
                     return;
                 }
 
-                const extractUrlsApiUrl = 'http://localhost:8000/api/extract-urls/';
-                this.http.post<{ urls: string[] }>(extractUrlsApiUrl, { text: this.extractedRawText }).subscribe(
-                    (response) => {
-                        console.log('Extracted URLs:', response.urls);
-                        this.extractedUrls = this.ensureValidUrlHeaders(response.urls);
-
-                        if (!this.extractedUrls || this.extractedUrls.length === 0) {
-                            alert('No URLs available for analysis.');
-                            this.isLoading = false;
-                            return;
-                        }
-
+                if (response.data.external_links && response.data.external_links.length > 0) {
+                  response.data.external_links.forEach(link => {
+                      if (link.url) {
+                          this.extractedUrls.push(link.url);
+                      }
+                  });
+              }
+              console.log(this.extractedUrls)
+                
                         const riskAssessmentApiUrl = 'http://localhost:8000/api/risk-assessment/batch/';
                         this.http.post<RiskAssessmentResponse[]>(riskAssessmentApiUrl, { urls: this.extractedUrls }).subscribe(
                             (response) => {
@@ -156,13 +155,6 @@ export class MaliciousUrlDetectionComponent implements OnInit, OnDestroy {
                                 this.isLoading = false;
                             }
                         );
-                    },
-                    (error) => {
-                        console.error('Error occurred while extracting URLs:', error);
-                        alert('Failed to extract URLs from the API.');
-                        this.isLoading = false;
-                    }
-                );
             },
             (error) => {
                 console.error('Error occurred:', error);

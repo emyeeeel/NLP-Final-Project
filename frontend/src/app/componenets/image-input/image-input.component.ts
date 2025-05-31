@@ -2,11 +2,13 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms'; 
 import { CommonModule } from '@angular/common'; 
 
-interface FileWithPreview {
+interface ImageInput {
   file: File;
   name: string;
   size: number;
   preview: string;
+  inputType: string; // Type of input (e.g., 'file', 'url', etc.)
+  filePath: string;  // Path to the file (if applicable)
 }
 
 @Component({
@@ -22,7 +24,7 @@ export class ImageInputComponent {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   // Component state
-  selectedFiles: FileWithPreview[] = [];
+  selectedFiles: ImageInput[] = [];
   isDragOver = false;
   showUrlInput = false;
   imageUrl = '';
@@ -163,7 +165,7 @@ export class ImageInputComponent {
   /**
    * Create file preview object
    */
-  private async createFilePreview(file: File): Promise<FileWithPreview> {
+  private async createFilePreview(file: File): Promise<ImageInput> {
     return new Promise((resolve) => {
       const reader = new FileReader();
       
@@ -172,17 +174,20 @@ export class ImageInputComponent {
           file,
           name: file.name,
           size: file.size,
-          preview: e.target?.result as string
+          preview: e.target?.result as string,
+          inputType: 'file', // Example input type
+          filePath: ''       // File path can be set if applicable
         });
       };
 
       if (file.type === 'application/pdf') {
-        // For PDF files, use a placeholder image
         resolve({
           file,
           name: file.name,
           size: file.size,
-          preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iNCIgZmlsbD0iI0Y3REJEQSI+PC9yZWN0Pgo8dGV4dCB4PSIzMCIgeT0iMzUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiNEQzI2MjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlBERjwvdGV4dD4KPC9zdmc+Cg=='
+          preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iNCIgZmlsbD0iI0Y3REJEQSI+PC9yZWN0Pgo8dGV4dCB4PSIzMCIgeT0iMzUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiNEQzI2MjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlBERjwvdGV4dD4KPC9zdmc+Cg==',
+          inputType: 'file',
+          filePath: ''
         });
       } else {
         reader.readAsDataURL(file);
