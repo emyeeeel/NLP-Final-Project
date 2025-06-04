@@ -1,0 +1,163 @@
+<div class="dashboard-container">
+  <!-- Sidebar -->
+  <div class="sidebar" [class.hidden]="isSidebarHidden">
+    <ul>
+      <li>
+        <a href="/home" 
+           class="nav-item" 
+           [class.active]="selectedItem === 'dashboard'" 
+           (click)="selectItem('dashboard')" 
+           aria-label="Dashboard">
+          <span class="nav-icon" aria-hidden="true"><i class="fas fa-th-large"></i></span>
+          Dashboard
+        </a>
+      </li>
+      <li>
+        <a href="/malicious-url-detection" 
+           class="nav-item" 
+           [class.active]="selectedItem === 'malicious-url-detection'" 
+           (click)="selectItem('malicious-url-detection')" 
+           aria-label="Malicious URL Detection">
+          <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-lock"></i></span>
+          Malicious URL Detection
+        </a>
+      </li>
+      <li>
+        <a href="/networking-scam-detection" 
+           class="nav-item" 
+           [class.active]="selectedItem === 'networking-scam-detection'" 
+           (click)="selectItem('networking-scam-detection')" 
+           aria-label="Networking Scam Detection">
+          <span class="nav-icon" aria-hidden="true"><i class="fas fa-user-friends"></i></span>
+          Networking Scam Detection
+        </a>
+      </li>
+      <li>
+        <a href="/phishing-interception" 
+           class="nav-item" 
+           [class.active]="selectedItem === 'phishing-interception'" 
+           (click)="selectItem('phishing-interception')" 
+           aria-label="Phishing Interception">
+          <span class="nav-icon" aria-hidden="true"><i class="fas fa-fish"></i></span>
+          Phishing Interception
+        </a>
+      </li>
+      <li>
+        <a href="/social-engineering-defense" 
+           class="nav-item" 
+           [class.active]="selectedItem === 'social-engineering-defense'" 
+           (click)="selectItem('social-engineering-defense')" 
+           aria-label="Social Engineering Defense">
+          <span class="nav-icon" aria-hidden="true"><i class="fas fa-brain"></i></span>
+          Social Engineering Defense
+        </a>
+      </li>
+      <li>
+        <a href="/fake-account-identification" 
+           class="nav-item" 
+           [class.active]="selectedItem === 'fake-account-identification'" 
+           (click)="selectItem('fake-account-identification')" 
+           aria-label="Fake Account Identification">
+          <span class="nav-icon" aria-hidden="true"><i class="fas fa-ghost"></i></span>
+          Fake Account Identification
+        </a>
+      </li>
+      <li>
+        <a href="javascript:void(0)" 
+           class="nav-item" 
+           [class.active]="selectedItem === 'logout'" 
+           (click)="selectItem('logout')" 
+           aria-label="Logout">
+          <span class="nav-icon" aria-hidden="true"><i class="fas fa-sign-out-alt"></i></span>
+          Logout
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <header>
+      <div class="header-left">
+        <button class="hamburger" (click)="toggleSidebar()">☰</button>
+        <span class="brand-name">BantAI</span>
+      </div>
+      <div class="header-right">
+        <h1>Welcome, {{ username }}</h1>
+        <div class="user-icon" aria-label="User Profile">
+          {{ username.charAt(0).toUpperCase() }}
+        </div>
+      </div>
+    </header>
+    
+    <div class="content">
+      <h2>Twitter Celebrity Account Verifier</h2>
+      <p>Check if a Twitter username belongs to a verified celebrity</p>
+
+      <div class="verifier-card">
+        <form [formGroup]="verifierForm" (ngSubmit)="verifyAccount()">
+          <div class="form-group">
+            <label for="username">Twitter Username</label>
+            <div class="input-container">
+              <span class="at-symbol">&#64;</span>
+              <input 
+                type="text" 
+                id="username" 
+                formControlName="username" 
+                placeholder="e.g. katyperry" 
+                autocomplete="off"
+                required>
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            class="verify-button" 
+            [disabled]="!verifierForm.valid || isLoading">
+            {{ isLoading ? 'Verifying...' : 'Verify Account' }}
+          </button>
+        </form>
+
+        <!-- Error message -->
+        <div class="error-message" *ngIf="error">{{ error }}</div>
+
+        <!-- Results -->
+        <div class="results" *ngIf="result">
+          <div *ngIf="result.match_found" class="match-found">
+            <div class="match-header">
+              <h2>{{ result.twitter_handle }}</h2>
+              <span class="verified-badge" *ngIf="result.verified">✓</span>
+            </div>
+
+            <div class="account-stats">
+              <div class="stat">
+                <span class="stat-label">Followers</span>
+                <span class="stat-value">{{ result.followers | number }}</span>
+              </div>
+              <div class="stat">
+                <span class="stat-label">Posts</span>
+                <span class="stat-value">{{ result.posts | number }}</span>
+              </div>
+              <div class="stat">
+                <span class="stat-label">Photos</span>
+                <span class="stat-value">{{ result.photos | number }}</span>
+              </div>
+            </div>
+
+            <div class="match-confidence">
+              Match confidence: {{ result.confidence_score }}%
+            </div>
+          </div>
+
+          <div *ngIf="!result.match_found" class="no-match">
+            <h2>No Match Found</h2>
+            <p>We couldn't find a verified celebrity account matching "{{ '@' + result.input_name }}".</p>
+            <div class="match-confidence">
+              Closest match confidence: {{ result.confidence_score }}%
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import ExtractUrlsView, OCRExtractionView, AnalyzeInstagramProfileView, SingleURLRiskAssessmentView, BatchURLRiskAssessmentView
+from .views import ExtractUrlsView, OCRExtractionView, AnalyzeInstagramProfileView, SingleURLRiskAssessmentView, BatchURLRiskAssessmentView, TwitterAccountVerifierView
 
 urlpatterns = [
     path('scrape-tweet/', views.scrape_tweet, name='scrape_tweet'),
@@ -10,4 +10,5 @@ urlpatterns = [
     path('risk-assessment/single/', SingleURLRiskAssessmentView.as_view(), name='single-url-risk-assessment'),
     path('risk-assessment/batch/', BatchURLRiskAssessmentView.as_view(), name='batch-url-risk-assessment'), 
     path('extract-urls/ocr/', OCRExtractionView.as_view(), name='extract-urls/ocr'),
+    path('verify-twitter-account/', TwitterAccountVerifierView.as_view(), name='verify-twitter-account'),
 ]

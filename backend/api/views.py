@@ -273,3 +273,61 @@ class OCRExtractionView(APIView):
                     os.remove(image_source)  # Clean up on error
                 return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+import pandas as pd
+from fuzzywuzzy import process
+from django.conf import settings
+
+
+class TwitterAccountVerifierView(APIView):
+    def post(self, request):
+        """Verify if a Twitter account belongs to a celebrity"""
+        try:
+            user_input = request.data.get('username')
+            if not user_input:
+                return Response({"error": "Username is required"}, 
+                               status=status.HTTP_400_BAD_REQUEST)
+            
+            # Path to CSV file
+            csv_path = os.path.join(settings.BASE_DIR, 'api', 'data', 'Top-1000-Celebrity-Twitter-Accounts.csv')
+            
+            # Load CSV
+            df = pd.read_csv(csv_path)
+            celebrity_names = df['twitter'].dropna().tolist()
+            
+            # Find best match
+            match, score = process.extractOne(user_input, celebrity_names)
+            threshold = 80  # Match threshold
+            
+            if score >= threshold:
+                person = df[df['twitter'] == match].iloc[0]
+                
+                twitter_handle = f"@{person['twitter']}"
+                followers = int(person['Folowers']) if pd.notna(person['Folowers']) else None
+                verified = bool(person['verified'])
+                photos = int(person['number of photes']) if pd.notna(person['number of photes']) else None
+                posts = int(person['Number of Posts']) if pd.notna(person['Number of Posts']) else None
+
+                result = {
+                    "match_found": True,
+                    "matched_name": match,
+                    "twitter_handle": twitter_handle,
+                    "verified": verified,
+                    "followers": followers,
+                    "photos": photos,
+                    "posts": posts,
+                    "confidence_score": score
+                }
+            else:
+                result = {
+                    "match_found": False,
+                    "input_name": user_input,
+                    "message": "No matching celebrity account found",
+                    "confidence_score": score
+                }
+            
+            return Response(result, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

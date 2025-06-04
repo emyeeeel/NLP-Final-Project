@@ -7,6 +7,7 @@ import { NetworkingScamDetectionComponent } from './pages/networking-scam-detect
 import { PhishingInterceptionComponent } from './pages/phishing-interception/phishing-interception.component';
 import { SocialEngineeringDefenseComponent } from './pages/social-engineering-defense/social-engineering-defense.component';
 import { FakeAccountIdentificationComponent } from './pages/fake-account-identification/fake-account-identification.component';
+import { TwitterAccountVerifierComponent } from './pages/twitter-account-verifier/twitter-account-verifier.component';
 import { LoginGuard } from './guards/login.guard';
 import { AuthGuard } from './guards/auth.guard';
 
@@ -21,4 +22,5 @@ export const routes: Routes = [
     { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
     { path: 'login', component: LoginComponent, canActivate: [LoginGuard] },
     { path: 'register', component: RegisterComponent, canActivate: [LoginGuard] },
+    { path: 'twitter-account-verifier', component: TwitterAccountVerifierComponent, canActivate: [AuthGuard] }
 ];
